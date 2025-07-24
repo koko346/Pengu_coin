@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penguin Tap</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        .container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .balance {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .page {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .tap-area {
+            width: 200px;
+            height: 200px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: transform 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tap-area:active {
+            transform: scale(0.95);
+        }
+        
+        .tap-area img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+        
+        .button {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            min-width: 100px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .nav-button {
+            padding: 15px 30px; /* Larger buttons */
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            font-size: 18px; /* Larger text */
+            margin: 0 5px;
+            flex: 1;
+            text-align: center;
+            max-width: 45%;
+        }
+        
+        .nav-button.active {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            font-weight: bold;
+        }
+        
+        .snow {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        
+        .progress-container {
+            width: 80%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .referral-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 80%;
+        }
+        
+        .referral-code {
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        
+        .join-channel {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .cooldown-message {
+            color: #ff6b6b;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="splash" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+        <h1>Penguin Tap</h1>
+        <p>Loading...</p>
+    </div>
+    
+    <div id="home-page" class="container">
+        <div class="header">
+            <div class="balance">Balance: <span id="coins">0</span> taps</div>
+            <div class="balance"><span id="penguin-coins">0</span> PENGUIN</div>
+        </div>
+        
+        <div class="page">
+            <h2>Tap the Penguin to earn!</h2>
+            
+            <div class="tap-area" id="tap-area">
+                <img src="https://em-content.zobj.net/source/microsoft-teams/363/penguin_1f427.png" alt="Penguin">
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="daily-progress"></div>
+            </div>
+            <p>Daily taps: <span id="daily-taps">0</span>/1000</p>
+            <p id="cooldown-message" class="cooldown-message" style="display: none;"></p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div>Total Taps</div>
+                    <div id="total-taps">0</div>
+                </div>
+                <div class="stat">
+                    <div>Today's PENGUIN</div>
+                    <div id="today-penguin">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav">
+            <div class="nav-button active" onclick="showPage('home')">Home</div>
+            <div class="nav-button" onclick="showPage('profile')">Profile</div>
+        </div>
+    </div>
+    
+    <div id="profile-page" class="container">
+        <div class="header">
+            <div class="balance">Balance: <span id="profile-coins">0</span> taps</div>
+            <div class="balance"><span id="profile-penguin-coins">0</span> PENGUIN</div>
+        </div>
+        
+        <div class="page">
+            <h2>Your Profile</h2>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div>Total Taps</div>
+                    <div id="profile-total-taps">0</div>
+                </div>
+                <div class="stat">
+                    <div>Total PENGUIN</div>
+                    <div id="profile-total-penguin">0</div>
+                </div>
+                <div class="stat">
+                    <div>Referrals</div>
+                    <div id="referral-count">0</div>
+                </div>
+            </div>
+            
+            <div class="referral-box">
+                <h3>Airdrop Requirements</h3>
+                <p>10 referrals and Telegram channel join required for PENGUIN airdrop</p>
+                
+                <p>Your referral code:</p>
+                <div class="referral-code" id="referral-code">LOADING...</div>
+                
+                <button class="button" onclick="copyReferralCode()">Copy Code</button>
+                
+                <div class="join-channel">
+                    <button class="button" onclick="window.open('https://t.me/PENGUIN70', '_blank')">Join Telegram Channel</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav">
+            <div class="nav-button" onclick="showPage('home')">Home</div>
+            <div class="nav-button active" onclick="showPage('profile')">Profile</div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        let gameData = {
+            totalTaps: 0,
+            dailyTaps: 0,
+            coins: 0,
+            penguinCoins: 0,
+            referrals: 0,
+            joinedChannel: false,
+            lastDailyReset: new Date().getTime(),
+            referralCode: generateReferralCode(),
+            cooldownEnd: 0
+        };
+        
+        // DOM elements
+        const elements = {
+            coins: document.getElementById('coins'),
+            penguinCoins: document.getElementById('penguin-coins'),
+            totalTaps: document.getElementById('total-taps'),
+            dailyTaps: document.getElementById('daily-taps'),
+            todayPenguin: document.getElementById('today-penguin'),
+            dailyProgress: document.getElementById('daily-progress'),
+            tapArea: document.getElementById('tap-area'),
+            profileCoins: document.getElementById('profile-coins'),
+            profilePenguinCoins: document.getElementById('profile-penguin-coins'),
+            profileTotalTaps: document.getElementById('profile-total-taps'),
+            profileTotalPenguin: document.getElementById('profile-total-penguin'),
+            referralCount: document.getElementById('referral-count'),
+            referralCode: document.getElementById('referral-code'),
+            homePage: document.getElementById('home-page'),
+            profilePage: document.getElementById('profile-page'),
+            splash: document.getElementById('splash'),
+            cooldownMessage: document.getElementById('cooldown-message')
+        };
+        
+        // Initialize the game
+        function initGame() {
+            // Load saved data
+            const savedData = localStorage.getItem('penguinTapData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                
+                // Check if we need to reset daily taps (12-hour cooldown)
+                const now = new Date().getTime();
+                const twelveHours = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+                
+                if (now - parsedData.lastDailyReset >= twelveHours) {
+                    parsedData.dailyTaps = 0;
+                    parsedData.lastDailyReset = now;
+                    parsedData.cooldownEnd = 0;
+                } else if (parsedData.dailyTaps >= 1000) {
+                    // If taps reached 1000 but cooldown not finished
+                    parsedData.cooldownEnd = parsedData.lastDailyReset + twelveHours;
+                }
+                
+                gameData = parsedData;
+            }
+            
+            updateUI();
+            createSnowflakes();
+            updateCooldownMessage();
+            
+            // Update cooldown message every second
+            setInterval(updateCooldownMessage, 1000);
+            
+            // Hide splash screen after loading
+            setTimeout(() => {
+                elements.splash.style.display = 'none';
+                showPage('home');
+            }, 1500);
+        }
+        
+        // Update all UI elements
+        function updateUI() {
+            elements.coins.textContent = gameData.coins.toLocaleString();
+            elements.penguinCoins.textContent = gameData.penguinCoins.toLocaleString();
+            elements.totalTaps.textContent = gameData.totalTaps.toLocaleString();
+            elements.dailyTaps.textContent = gameData.dailyTaps.toLocaleString();
+            elements.todayPenguin.textContent = Math.floor(gameData.dailyTaps / 100).toLocaleString();
+            elements.dailyProgress.style.width = `${Math.min(100, (gameData.dailyTaps / 1000) * 100)}%`;
+            
+            elements.profileCoins.textContent = gameData.coins.toLocaleString();
+            elements.profilePenguinCoins.textContent = gameData.penguinCoins.toLocaleString();
+            elements.profileTotalTaps.textContent = gameData.totalTaps.toLocaleString();
+            elements.profileTotalPenguin.textContent = gameData.penguinCoins.toLocaleString();
+            elements.referralCount.textContent = gameData.referrals.toLocaleString();
+            elements.referralCode.textContent = gameData.referralCode;
+            
+            // Save game data
+            localStorage.setItem('penguinTapData', JSON.stringify(gameData));
+        }
+        
+        // Update cooldown message
+        function updateCooldownMessage() {
+            const now = new Date().getTime();
+            
+            if (gameData.dailyTaps >= 1000 && now < gameData.cooldownEnd) {
+                const remainingTime = gameData.cooldownEnd - now;
+                const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                
+                elements.cooldownMessage.style.display = 'block';
+                elements.cooldownMessage.textContent = `Cooldown: ${hours}h ${minutes}m ${seconds}s remaining`;
+                elements.tapArea.style.opacity = '0.5';
+                elements.tapArea.style.cursor = 'not-allowed';
+            } else if (gameData.dailyTaps >= 1000 && now >= gameData.cooldownEnd) {
+                // Reset if cooldown is over
+                gameData.dailyTaps = 0;
+                gameData.lastDailyReset = now;
+                gameData.cooldownEnd = 0;
+                updateUI();
+                
+                elements.cooldownMessage.style.display = 'none';
+                elements.tapArea.style.opacity = '1';
+                elements.tapArea.style.cursor = 'pointer';
+            } else {
+                elements.cooldownMessage.style.display = 'none';
+                elements.tapArea.style.opacity = '1';
+                elements.tapArea.style.cursor = 'pointer';
+            }
+        }
+        
+        // Handle tap
+        elements.tapArea.addEventListener('click', () => {
+            const now = new Date().getTime();
+            
+            // Check if in cooldown
+            if (gameData.dailyTaps >= 1000 && now < gameData.cooldownEnd) {
+                return;
+            }
+            
+            // Reset if cooldown is over but taps still at 1000
+            if (gameData.dailyTaps >= 1000 && now >= gameData.cooldownEnd) {
+                gameData.dailyTaps = 0;
+                gameData.lastDailyReset = now;
+                gameData.cooldownEnd = 0;
+            }
+            
+            // Check if we've reached the daily limit
+            if (gameData.dailyTaps >= 1000) {
+                gameData.cooldownEnd = gameData.lastDailyReset + (12 * 60 * 60 * 1000);
+                updateCooldownMessage();
+                return;
+            }
+            
+            gameData.totalTaps++;
+            gameData.coins++;
+            gameData.dailyTaps++;
+            
+            // Every 100 taps = 1 PENGUIN coin
+            if (gameData.dailyTaps % 100 === 0) {
+                gameData.penguinCoins++;
+            }
+            
+            // Create tap effect
+            createTapEffect(event);
+            
+            updateUI();
+        });
+        
+        // Show different pages
+        function showPage(page) {
+            if (page === 'home') {
+                elements.homePage.style.display = 'flex';
+                elements.profilePage.style.display = 'none';
+                
+                // Update nav buttons
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('#home-page .nav-button:first-child').classList.add('active');
+            } else if (page === 'profile') {
+                elements.homePage.style.display = 'none';
+                elements.profilePage.style.display = 'flex';
+                
+                // Update nav buttons
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('#profile-page .nav-button:last-child').classList.add('active');
+            }
+        }
+        
+        // Generate random referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        // Copy referral code
+        function copyReferralCode() {
+            navigator.clipboard.writeText(gameData.referralCode);
+            alert('Referral code copied to clipboard!');
+        }
+        
+        // Join channel button
+        function joinChannel() {
+            window.open('https://t.me/PENGUIN70', '_blank');
+            gameData.joinedChannel = true;
+            updateUI();
+            alert('Thank you for joining our Telegram channel!');
+        }
+        
+        // Create snowflakes for background
+        function createSnowflakes() {
+            const body = document.querySelector('body');
+            
+            for (let i = 0; i < 50; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snow');
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const posX = Math.random() * window.innerWidth;
+                const delay = Math.random() * 5;
+                const opacity = Math.random() * 0.5 + 0.3;
+                const duration = Math.random() * 10 + 5;
+                
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                snowflake.style.left = `${posX}px`;
+                snowflake.style.opacity = opacity;
+                snowflake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
+                
+                body.appendChild(snowflake);
+            }
+            
+            // Add animation style
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        transform: translateY(100vh);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Create tap effect
+        function createTapEffect(event) {
+            const tapEffect = document.createElement('div');
+            tapEffect.classList.add('snow');
+            tapEffect.style.width = '20px';
+            tapEffect.style.height = '20px';
+            tapEffect.style.left = `${event.clientX - 10}px`;
+            tapEffect.style.top = `${event.clientY - 10}px`;
+            tapEffect.style.background = 'rgba(255, 255, 255, 0.7)';
+            tapEffect.style.animation = 'rise 1s linear forwards';
+            
+            document.body.appendChild(tapEffect);
+            
+            // Remove after animation
+            setTimeout(() => {
+                tapEffect.remove();
+            }, 1000);
+            
+            // Add animation style if not already present
+            if (!document.getElementById('rise-animation')) {
+                const style = document.createElement('style');
+                style.id = 'rise-animation';
+                style.textContent = `
+                    @keyframes rise {
+                        to {
+                            transform: translateY(-50px);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Simulate referral (for demo purposes)
+        function simulateReferral() {
+            gameData.referrals++;
+            updateUI();
+        }
+        
+        // Initialize the game when loaded
+        window.addEventListener('load', initGame);
+        
+        // For demo purposes - add a way to simulate referrals
+        window.simulateReferral = simulateReferral;
+    </script>
+</body>
+</html>
