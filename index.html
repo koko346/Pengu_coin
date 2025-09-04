@@ -1,566 +1,708 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penguin Tap</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-        }
-        
-        .container {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .balance {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .page {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .tap-area {
-            width: 200px;
-            height: 200px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-            cursor: pointer;
-            transition: transform 0.1s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .tap-area:active {
-            transform: scale(0.95);
-        }
-        
-        .tap-area img {
-            width: 80%;
-            height: 80%;
-            object-fit: contain;
-        }
-        
-        .button {
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            border: none;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            margin: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s;
-        }
-        
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .button:active {
-            transform: translateY(0);
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .stat {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 10px;
-            min-width: 100px;
-        }
-        
-        .nav {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .nav-button {
-            padding: 15px 30px; /* Larger buttons */
-            border-radius: 25px;
-            background: rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            font-size: 18px; /* Larger text */
-            margin: 0 5px;
-            flex: 1;
-            text-align: center;
-            max-width: 45%;
-        }
-        
-        .nav-button.active {
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            font-weight: bold;
-        }
-        
-        .snow {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            pointer-events: none;
-        }
-        
-        .progress-container {
-            width: 80%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .referral-box {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            width: 80%;
-        }
-        
-        .referral-code {
-            font-family: monospace;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px;
-            border-radius: 5px;
-            margin-top: 10px;
-            word-break: break-all;
-        }
-        
-        .join-channel {
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        
-        .cooldown-message {
-            color: #ff6b6b;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>টাস্ক রিওয়ার্ড — টাকা</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #1c2a38;
+      --card: #2c3a4d;
+      --card-2:#223040;
+      --text:#f0f7ff;
+      --muted:#aabccd;
+      --brand:#00a3cc;
+      --brand-2:#73e042;
+      --accent:#ffd166;
+      --danger:#ef476f;
+      --success:#06d6a0;
+      --shadow: 0 20px 50px rgba(0,0,0,.55);
+      --radius: 22px;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0 }
+    html,body{ height:100% }
+    body{
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at -10% -10%, rgba(0,163,204,.15), transparent 60%),
+        radial-gradient(900px 500px at 110% -10%, rgba(115,224,66,.12), transparent 60%),
+        radial-gradient(900px 600px at 50% 120%, rgba(255,209,102,.12), transparent 60%),
+        linear-gradient(180deg,#1c2a38 0%, #172432 100%);
+      display:flex; justify-content:center; align-items:center; padding:20px;
+    }
+
+    .container{
+      width:100%; max-width:460px; min-height:92vh;
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px; box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      position:relative; overflow:hidden; padding-bottom:88px;
+    }
+
+    /* Header */
+    .header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 18px; background:rgba(44,58,77,.6);
+      border-bottom:1px solid rgba(255,255,255,.06);
+      position:sticky; top:0; z-index:5;
+    }
+    .header .title{ font-weight:700; letter-spacing:.2px }
+    .hdr-btn{
+      font-size:12px; padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04); color:var(--text); cursor:pointer;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .hdr-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22) }
+
+    /* Balance */
+    .balance{
+      margin:18px; border-radius:22px; padding:20px 18px;
+      background:
+        radial-gradient(140% 140% at 0% 0%, rgba(0,163,204,.25), transparent 60%),
+        radial-gradient(120% 120% at 100% 0%, rgba(115,224,66,.25), transparent 60%),
+        linear-gradient(180deg, #223040, #1c2a38);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .balance h2{ font-size:13px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.12em }
+    .balance-amount{ font-size:36px; font-weight:800; margin-top:6px }
+
+    .content{ padding:18px; }
+
+    .section-title{
+      text-align:center; font-size:18px; font-weight:800; letter-spacing:.2px; margin:6px 0 18px;
+    }
+    .note{
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+      color:var(--muted); padding:14px; border-radius:16px; line-height:1.45; font-size:13px;
+    }
+
+    /* Grid */
+    .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:16px }
+    .card{
+      background:var(--card); border:1px solid rgba(255,255,255,.08);
+      border-radius:18px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.35);
+    }
+    .card h4{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em }
+    .value{ font-size:26px; font-weight:800; margin-top:4px }
+    .value small{ font-size:12px; color:var(--muted); font-weight:600; margin-left:4px }
+
+    /* Buttons */
+    .btn{
+      width:100%; padding:16px; border-radius:16px; border:none; cursor:pointer;
+      font-weight:800; letter-spacing:.2px; margin:16px 0 2px;
+      background:linear-gradient(90deg, var(--brand), var(--brand-2));
+      color:#1c2a38; box-shadow:0 12px 30px rgba(0,163,204,.35);
+      transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+    .btn:hover{ transform:translateY(-1px); box-shadow:0 16px 36px rgba(0,163,204,.45) }
+    .btn:disabled{ filter:saturate(.2) brightness(.8); cursor:not-allowed; transform:none; box-shadow:none }
+
+    .btn-secondary{
+      background:transparent; color:var(--text);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+    }
+
+    .ad-container{
+      background:linear-gradient(180deg, var(--card), var(--card-2));
+      border:1px dashed rgba(255,255,255,.18);
+      padding:18px; border-radius:18px; text-align:center; margin-top:10px;
+    }
+    .ad-status{ margin-top:8px; font-size:13px }
+
+    /* Inputs */
+    .input{
+      width:100%; padding:14px 14px; border-radius:14px;
+      background:rgba(255,255,255,.04); color:var(--text);
+      border:1px solid rgba(255,255,255,.12); outline:none; font-size:14px;
+      transition:border-color .12s ease, background .12s ease;
+      margin:10px 0 6px;
+    }
+    .input::placeholder{ color:#aabccd }
+    .input:focus{ border-color:var(--brand) }
+
+    .method{
+      display:flex; align-items:center; gap:10px;
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
+      padding:12px; border-radius:14px; margin:8px 0; cursor:pointer;
+      transition:transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .method:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.22); background:rgba(255,255,255,.06) }
+    .method input[type="radio"]{ accent-color:var(--brand) }
+
+    .warn{
+      margin-top:12px; padding:12px; border-radius:14px; font-weight:600;
+      background:rgba(239,71,111,.08); border:1px solid rgba(239,71,111,.3); color:#ff8aa3;
+    }
+    .status{
+      display:none; margin-top:14px; padding:14px; border-radius:14px;
+      background:rgba(6,214,160,.09); border:1px solid rgba(6,214,160,.35); color:#a8f1dc;
+    }
+
+    /* Nav */
+    .nav{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:14px; width:100%; max-width:460px; padding:10px 12px;
+      display:grid; grid-template-columns:repeat(5,1fr); gap:10px;
+      background:rgba(44,58,77,.75); border:1px solid rgba(255,255,255,.08);
+      border-radius:18px; backdrop-filter: blur(10px);
+    }
+    .nav-item{
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      padding:10px 6px; border-radius:12px; color:var(--muted); cursor:pointer;
+      transition:transform .12s ease, background .12s ease, color .12s ease;
+      font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+    }
+    .nav-item svg{ width:22px; height:22px }
+    .nav-item.active{ color:var(--text); background:rgba(0,163,204,.12) }
+    .nav-item:hover{ transform:translateY(-1px) }
+
+    .screen{ display:none; animation:fade .25s ease }
+    .screen.active{ display:block }
+
+    @keyframes fade{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:translateY(0) } }
+
+    /* Small helper labels */
+    .label{ font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.12em; margin-top:10px }
+    .center{ text-align:center }
+    .mt-8{ margin-top:8px } .mt-12{ margin-top:12px } .mt-16{ margin-top:16px } .mt-20{ margin-top:20px }
+  </style>
 </head>
 <body>
-    <div id="splash" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
-        <h1>Penguin Tap</h1>
-        <p>Loading...</p>
-    </div>
-    
-    <div id="home-page" class="container">
-        <div class="header">
-            <div class="balance">Balance: <span id="coins">0</span> taps</div>
-            <div class="balance"><span id="penguin-coins">0</span> PENGUIN</div>
+  <div class="container" id="app">
+
+    <div id="home-screen" class="screen active">
+      <div class="header">
+        <button class="hdr-btn" onclick="window.history.back()">Back</button>
+        <div class="title">টাস্ক রিওয়ার্ড</div>
+        <button class="hdr-btn" onclick="showMenu()">মেনু</button>
+      </div>
+
+      <div class="balance">
+        <h2>ব্যালেন্স</h2>
+        <div class="balance-amount" id="balance">0.00 টাকা</div>
+      </div>
+
+      <div class="content">
+        <div class="section-title">দৈনিক চেক-ইন বোনাস</div>
+        <div class="note">
+          আপনার ধারাবাহিকতা ধরে রাখুন এবং প্রতিদিন একটি ছোট বোনাস দাবি করুন।
         </div>
-        
-        <div class="page">
-            <h2>Tap the Penguin to earn!</h2>
-            
-            <div class="tap-area" id="tap-area">
-                <img src="https://em-content.zobj.net/source/microsoft-teams/363/penguin_1f427.png" alt="Penguin">
-            </div>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="daily-progress"></div>
-            </div>
-            <p>Daily taps: <span id="daily-taps">0</span>/1000</p>
-            <p id="cooldown-message" class="cooldown-message" style="display: none;"></p>
-            
-            <div class="stats">
-                <div class="stat">
-                    <div>Total Taps</div>
-                    <div id="total-taps">0</div>
-                </div>
-                <div class="stat">
-                    <div>Today's PENGUIN</div>
-                    <div id="today-penguin">0</div>
-                </div>
-            </div>
+
+        <div class="grid">
+          <div class="card">
+            <h4>বর্তমান ধারাবাহিকতা</h4>
+            <div class="value"><span id="current-streak">0</span><small>দিন</small></div>
+          </div>
+          <div class="card">
+            <h4>মোট আয়</h4>
+            <div class="value"><span id="total-earned">0.00</span><small>টাকা</small></div>
+          </div>
         </div>
-        
-        <div class="nav">
-            <div class="nav-button active" onclick="showPage('home')">Home</div>
-            <div class="nav-button" onclick="showPage('profile')">Profile</div>
-        </div>
-    </div>
-    
-    <div id="profile-page" class="container">
-        <div class="header">
-            <div class="balance">Balance: <span id="profile-coins">0</span> taps</div>
-            <div class="balance"><span id="profile-penguin-coins">0</span> PENGUIN</div>
-        </div>
-        
-        <div class="page">
-            <h2>Your Profile</h2>
-            
-            <div class="stats">
-                <div class="stat">
-                    <div>Total Taps</div>
-                    <div id="profile-total-taps">0</div>
-                </div>
-                <div class="stat">
-                    <div>Total PENGUIN</div>
-                    <div id="profile-total-penguin">0</div>
-                </div>
-                <div class="stat">
-                    <div>Referrals</div>
-                    <div id="referral-count">0</div>
-                </div>
-            </div>
-            
-            <div class="referral-box">
-                <h3>Airdrop Requirements</h3>
-                <p>10 referrals and Telegram channel join required for PENGUIN airdrop</p>
-                
-                <p>Your referral code:</p>
-                <div class="referral-code" id="referral-code">LOADING...</div>
-                
-                <button class="button" onclick="copyReferralCode()">Copy Code</button>
-                
-                <div class="join-channel">
-                    <button class="button" onclick="window.open('https://t.me/PENGUIN70', '_blank')">Join Telegram Channel</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="nav">
-            <div class="nav-button" onclick="showPage('home')">Home</div>
-            <div class="nav-button active" onclick="showPage('profile')">Profile</div>
-        </div>
+
+        <button class="btn" id="checkin-btn">দৈনিক পুরস্কার দাবি করুন</button>
+      </div>
     </div>
 
-    <script>
-        // Game data
-        let gameData = {
-            totalTaps: 0,
-            dailyTaps: 0,
-            coins: 0,
-            penguinCoins: 0,
-            referrals: 0,
-            joinedChannel: false,
-            lastDailyReset: new Date().getTime(),
-            referralCode: generateReferralCode(),
-            cooldownEnd: 0
-        };
-        
-        // DOM elements
-        const elements = {
-            coins: document.getElementById('coins'),
-            penguinCoins: document.getElementById('penguin-coins'),
-            totalTaps: document.getElementById('total-taps'),
-            dailyTaps: document.getElementById('daily-taps'),
-            todayPenguin: document.getElementById('today-penguin'),
-            dailyProgress: document.getElementById('daily-progress'),
-            tapArea: document.getElementById('tap-area'),
-            profileCoins: document.getElementById('profile-coins'),
-            profilePenguinCoins: document.getElementById('profile-penguin-coins'),
-            profileTotalTaps: document.getElementById('profile-total-taps'),
-            profileTotalPenguin: document.getElementById('profile-total-penguin'),
-            referralCount: document.getElementById('referral-count'),
-            referralCode: document.getElementById('referral-code'),
-            homePage: document.getElementById('home-page'),
-            profilePage: document.getElementById('profile-page'),
-            splash: document.getElementById('splash'),
-            cooldownMessage: document.getElementById('cooldown-message')
-        };
-        
-        // Initialize the game
-        function initGame() {
-            // Load saved data
-            const savedData = localStorage.getItem('penguinTapData');
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                
-                // Check if we need to reset daily taps (12-hour cooldown)
-                const now = new Date().getTime();
-                const twelveHours = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
-                
-                if (now - parsedData.lastDailyReset >= twelveHours) {
-                    parsedData.dailyTaps = 0;
-                    parsedData.lastDailyReset = now;
-                    parsedData.cooldownEnd = 0;
-                } else if (parsedData.dailyTaps >= 1000) {
-                    // If taps reached 1000 but cooldown not finished
-                    parsedData.cooldownEnd = parsedData.lastDailyReset + twelveHours;
-                }
-                
-                gameData = parsedData;
-            }
-            
-            updateUI();
-            createSnowflakes();
-            updateCooldownMessage();
-            
-            // Update cooldown message every second
-            setInterval(updateCooldownMessage, 1000);
-            
-            // Hide splash screen after loading
-            setTimeout(() => {
-                elements.splash.style.display = 'none';
-                showPage('home');
-            }, 1500);
+    <div id="ads-screen" class="screen">
+      <div class="header">
+        <button class="hdr-btn" onclick="showScreen('home-screen')">Back</button>
+        <div class="title">বিজ্ঞাপন দেখুন</div>
+        <button class="hdr-btn" onclick="showMenu()">মেনু</button>
+      </div>
+
+      <div class="balance">
+        <h2>ব্যালেন্স</h2>
+        <div class="balance-amount" id="ads-balance">0.00 টাকা</div>
+      </div>
+
+      <div class="content">
+        <div class="section-title">বিজ্ঞাপন টাস্ক</div>
+        <div class="note">টাকা উপার্জনের জন্য বিজ্ঞাপন দেখুন। প্রতি ঘণ্টা এবং দৈনিক সীমা প্রযোজ্য।</div>
+
+        <div class="card mt-12">
+          <h4>দৈনিক টাস্ক</h4>
+          <div class="value"><span id="daily-tasks">0/60</span></div>
+        </div>
+        <div class="card mt-12">
+          <h4>লাইফটাইম টাস্ক</h4>
+          <div class="value"><span id="lifetime-tasks">0</span></div>
+        </div>
+        <div class="card mt-12">
+          <h4>প্রতি ঘণ্টা টাস্ক</h4>
+          <div class="value"><span id="hourly-tasks">0/20</span></div>
+        </div>
+        <div class="card mt-12">
+          <h4>মোট উপার্জন</h4>
+          <div class="value"><span id="total-earnings">0.00</span><small>টাকা</small></div>
+        </div>
+
+        <div class="ad-container mt-16" id="ad-container">
+          <p class="center">বিজ্ঞাপন দেখতে এবং পুরস্কার জিততে বোতামে ক্লিক করুন।</p>
+          <button class="btn" onclick="showAdAndReward()" id="task-btn">বিজ্ঞাপন দেখুন (+7 টাকা)</button>
+          <div id="ad-status" class="ad-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tg-screen" class="screen">
+      <div class="header">
+        <button class="hdr-btn" onclick="showScreen('home-screen')">Back</button>
+        <div class="title">টেলিগ্রাম টাস্ক</div>
+        <button class="hdr-btn" onclick="showMenu()">মেনু</button>
+      </div>
+
+      <div class="balance">
+        <h2>ব্যালেন্স</h2>
+        <div class="balance-amount" id="tg-balance">0.00 টাকা</div>
+      </div>
+
+      <div class="content center">
+        <div class="section-title">যোগ দিন এবং যাচাই করুন</div>
+        <div class="note">আমাদের টেলিগ্রাম চ্যানেলে যোগ দিন এবং একবারের জন্য একটি বোনাস পেতে যাচাই করুন।</div>
+
+        <div class="mt-20">
+          <p class="mt-8">অফিসিয়াল চ্যানেলে যোগ দিন:</p>
+          <button class="btn" onclick="window.open('https://t.me/PUFI83','_blank')">টেলিগ্রাম চ্যানেল খুলুন</button>
+          <button class="btn btn-secondary" onclick="verifyTelegram()" id="verify-btn">যোগদান যাচাই করুন (+50 টাকা)</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="withdraw-screen" class="screen">
+      <div class="header">
+        <button class="hdr-btn" onclick="showScreen('home-screen')">Back</button>
+        <div class="title">উত্তোলন</div>
+        <button class="hdr-btn" onclick="showMenu()">মেনু</button>
+      </div>
+
+      <div class="balance">
+        <h2>ব্যালেন্স</h2>
+        <div class="balance-amount" id="withdraw-balance">0.00 টাকা</div>
+      </div>
+
+      <div class="content">
+        <div class="section-title">পেমেন্ট অনুরোধ করুন</div>
+        <div class="note">
+          সর্বনিম্ন উত্তোলন <b>2000 টাকা</b>।
+        </div>
+
+        <div id="referral-warning" class="warn">
+          উত্তোলন করতে আপনার কমপক্ষে <b>7 জন রেফারেল</b> থাকতে হবে।
+        </div>
+
+        <div class="label mt-16">পরিমাণ (টাকা)</div>
+        <input type="number" step="0.01" class="input" id="withdraw-amount" placeholder="পরিমাণ লিখুন (সর্বনিম্ন 2000.00)"/>
+        <div class="label">নম্বর</div>
+        <input type="text" class="input" id="withdraw-address" placeholder="আপনার নগদ/বিকাশ নম্বর লিখুন"/>
+
+        <div class="label">পেমেন্ট পদ্ধতি</div>
+        <label class="method">
+          <input type="radio" name="payment" id="nagad" checked>
+          <span><b>নগদ</b></span>
+        </label>
+        <label class="method">
+          <input type="radio" name="payment" id="bkash">
+          <span><b>বিকাশ</b></span>
+        </label>
+
+        <button class="btn" onclick="requestWithdrawal()">উত্তোলনের অনুরোধ জমা দিন</button>
+
+        <div id="withdrawal-status" class="status">
+          <h4 style="margin-bottom:6px;">উত্তোলনের অনুরোধ জমা দেওয়া হয়েছে!</h4>
+          <p id="status-message"></p>
+          <p class="mt-8" style="color:var(--muted);">আপনার পেমেন্ট শীঘ্রই প্রক্রিয়া করা হবে।</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="profile-screen" class="screen">
+      <div class="header">
+        <button class="hdr-btn" onclick="showScreen('home-screen')">Back</button>
+        <div class="title">প্রোফাইল</div>
+        <button class="hdr-btn" onclick="showMenu()">মেনু</button>
+      </div>
+
+      <div class="balance">
+        <h2>ব্যালেন্স</h2>
+        <div class="balance-amount" id="profile-balance">0.00 টাকা</div>
+      </div>
+
+      <div class="content">
+        <div class="section-title">পর্যবেক্ষণ</div>
+        <div class="note center">যোগদান করেছেন: <b>জুলাই 31, 2025</b></div>
+
+        <div class="grid mt-16">
+          <div class="card">
+            <h4>মোট আয়</h4>
+            <div class="value"><span id="p-total-earned">0.00</span><small>টাকা</small></div>
+          </div>
+          <div class="card">
+            <h4>বর্তমান ধারাবাহিকতা</h4>
+            <div class="value"><span id="p-current-streak">0</span><small>দিন</small></div>
+          </div>
+          <div class="card">
+            <h4>সম্পন্ন টাস্ক</h4>
+            <div class="value" id="tasks-done">0</div>
+          </div>
+          <div class="card">
+            <h4>উত্তোলন</h4>
+            <div class="value" id="withdrawals-count">0</div>
+          </div>
+          <div class="card">
+            <h4>রেফারেল</h4>
+            <div class="value" id="referrals-count">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-item active" onclick="showScreen('home-screen')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        হোম
+      </div>
+      <div class="nav-item" onclick="showScreen('ads-screen')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        বিজ্ঞাপন
+      </div>
+      <div class="nav-item" onclick="showScreen('tg-screen')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        টেলিগ্রাম
+      </div>
+      <div class="nav-item" onclick="showScreen('withdraw-screen')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        উত্তোলন
+      </div>
+      <div class="nav-item" onclick="showScreen('profile-screen')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        প্রোফাইল
+      </div>
+    </div>
+  </div>
+
+  <script data-project-id="1268">
+  !function(){
+    var s=document.currentScript,p=s.getAttribute('data-project-id')||'default';
+    var d=['https://ad.gigapub.tech','https://ru-ad.gigapub.tech'],i=0,t,sc;
+    function l(){
+      sc=document.createElement('script');
+      sc.async=true;
+      sc.src=d[i]+'/script?id='+p;
+      clearTimeout(t);
+      t=setTimeout(function(){
+        sc.onload=sc.onerror=null;
+        sc.src='';
+        if(++i<d.length)l();
+      },15000);
+      sc.onload=function(){clearTimeout(t)};
+      sc.onerror=function(){clearTimeout(t);if(++i<d.length)l()};
+      document.head.appendChild(sc);
+    }
+    l();
+  }();
+  </script>
+
+  <script>
+    // ------- Config (BDT/টাকা version) -------
+    const DAILY_ADS_LIMIT = 60;
+    const HOURLY_ADS_LIMIT = 20;
+    const AD_REWARD_AMOUNT = 7;              // per ad in টাকা
+    const AD_RELOAD_DELAY = 7000;            // 7 seconds
+    const DAILY_CHECKIN_REWARD = 5;          // daily check-in in টাকা
+    const MIN_WITHDRAWAL = 2000;             // টাকা
+    const REQUIRED_REFERRALS = 7;
+    const TELEGRAM_CHANNEL_LINK = "https://t.me/PUFI83";
+    const TELEGRAM_BONUS = 50;               // one-time join bonus (টাকা)
+
+    // ------- State -------
+    let userData = {
+      userId: generateUserId(),
+      balance: 0,
+      dailyTasksCompleted: 0,
+      lifetimeTasksCompleted: 0,
+      hourlyTasksCompleted: 0,
+      totalEarnings: 0,
+      currentStreak: 0,
+      tasksDone: 0,
+      withdrawals: 0,
+      referrals: 0,
+      lastCheckin: null,
+      lastTaskTime: null,
+      telegramVerified: false
+    };
+
+    function generateUserId(){ return 'USER' + Math.floor(100000 + Math.random()*900000) }
+
+    // ------- Storage -------
+    function loadUserData(){
+      try{
+        const saved = localStorage.getItem('bdtTaskUserData');
+        if(saved){
+          userData = { ...userData, ...JSON.parse(saved) };
         }
-        
-        // Update all UI elements
-        function updateUI() {
-            elements.coins.textContent = gameData.coins.toLocaleString();
-            elements.penguinCoins.textContent = gameData.penguinCoins.toLocaleString();
-            elements.totalTaps.textContent = gameData.totalTaps.toLocaleString();
-            elements.dailyTaps.textContent = gameData.dailyTaps.toLocaleString();
-            elements.todayPenguin.textContent = Math.floor(gameData.dailyTaps / 100).toLocaleString();
-            elements.dailyProgress.style.width = `${Math.min(100, (gameData.dailyTaps / 1000) * 100)}%`;
-            
-            elements.profileCoins.textContent = gameData.coins.toLocaleString();
-            elements.profilePenguinCoins.textContent = gameData.penguinCoins.toLocaleString();
-            elements.profileTotalTaps.textContent = gameData.totalTaps.toLocaleString();
-            elements.profileTotalPenguin.textContent = gameData.penguinCoins.toLocaleString();
-            elements.referralCount.textContent = gameData.referrals.toLocaleString();
-            elements.referralCode.textContent = gameData.referralCode;
-            
-            // Save game data
-            localStorage.setItem('penguinTapData', JSON.stringify(gameData));
+      }catch(e){
+        console.error('Load error', e);
+        localStorage.removeItem('bdtTaskUserData');
+      }
+    }
+    function saveUserData(){
+      try{ localStorage.setItem('bdtTaskUserData', JSON.stringify(userData)); }
+      catch(e){ console.error('Save error', e); }
+    }
+
+    // ------- UI helpers -------
+    const fmt = (n) => (Math.round((Number(n)||0)*100)/100).toFixed(2);
+
+    function updateBalances(){
+      document.querySelectorAll('.balance-amount').forEach(el=>{
+        el.textContent = fmt(userData.balance) + ' টাকা';
+      });
+    }
+    function updateStats(){
+      byId('total-earned').textContent = fmt(userData.totalEarnings);
+      byId('p-total-earned').textContent = fmt(userData.totalEarnings);
+      byId('current-streak').textContent = userData.currentStreak;
+      byId('p-current-streak').textContent = userData.currentStreak;
+      byId('tasks-done').textContent = userData.tasksDone;
+      byId('withdrawals-count').textContent = userData.withdrawals;
+      byId('referrals-count').textContent = userData.referrals;
+    }
+    function updateTaskCounts(){
+      setText('daily-tasks', userData.dailyTasksCompleted + '/' + DAILY_ADS_LIMIT);
+      setText('lifetime-tasks', userData.lifetimeTasksCompleted);
+      setText('hourly-tasks', userData.hourlyTasksCompleted + '/' + HOURLY_ADS_LIMIT);
+      setText('total-earnings', fmt(userData.totalEarnings));
+    }
+
+    function updateAll(){
+      updateBalances();
+      updateStats();
+      updateTaskCounts();
+    }
+
+    function updateReferralWarning(){
+      const el = byId('referral-warning');
+      if(!el) return;
+      el.style.display = (userData.referrals < REQUIRED_REFERRALS) ? 'block' : 'none';
+    }
+
+    function updateTelegramButton(){
+      const tgBtn = byId('verify-btn');
+      if(!tgBtn) return;
+      if(userData.telegramVerified){
+        tgBtn.disabled = true;
+        tgBtn.textContent = 'ইতিমধ্যে যাচাই করা হয়েছে';
+      }else{
+        tgBtn.disabled = false;
+        tgBtn.textContent = `যোগদান যাচাই করুন (+${fmt(TELEGRAM_BONUS)} টাকা)`;
+      }
+    }
+
+    // ------- Screen / Nav -------
+    function showScreen(id){
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      byId(id).classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+      const map = { 'home-screen':0, 'ads-screen':1, 'tg-screen':2, 'withdraw-screen':3, 'profile-screen':4 };
+      const idx = map[id] ?? 0;
+      document.querySelectorAll('.nav .nav-item')[idx].classList.add('active');
+
+      if(id==='tg-screen') updateTelegramButton();
+      if(id==='withdraw-screen'){
+        updateReferralWarning();
+        const st=byId('withdrawal-status'); if(st){ st.style.display='none'; }
+      }
+      updateAll();
+    }
+
+    function showMenu(){ alert('মেনু প্লেসহোল্ডার') }
+
+    // ------- Task Availability -------
+    function checkTaskAvailability(){
+      const now = new Date();
+      const last = userData.lastTaskTime ? new Date(userData.lastTaskTime) : null;
+      if(!last || last.toDateString() !== now.toDateString()){ userData.dailyTasksCompleted = 0; }
+      if(!last || last.getHours() !== now.getHours()){ userData.hourlyTasksCompleted = 0; }
+      saveUserData();
+      updateTaskCounts();
+
+      const taskBtn = byId('task-btn');
+      taskBtn.textContent = `বিজ্ঞাপন দেখুন (+${fmt(AD_REWARD_AMOUNT)} টাকা)`;
+
+      if(userData.dailyTasksCompleted >= DAILY_ADS_LIMIT){
+        taskBtn.disabled = true; taskBtn.textContent = 'দৈনিক সীমা পৌঁছে গেছে'; return;
+      }
+      if(userData.hourlyTasksCompleted >= HOURLY_ADS_LIMIT){
+        taskBtn.disabled = true; taskBtn.textContent = 'প্রতি ঘণ্টার সীমা পৌঁছে গেছে'; return;
+      }
+      
+      // Check for 7-second cooldown
+      if(last && now.getTime() - last.getTime() < AD_RELOAD_DELAY){
+        const remaining = Math.ceil((AD_RELOAD_DELAY - (now.getTime() - last.getTime())) / 1000);
+        taskBtn.disabled = true;
+        taskBtn.textContent = `পরবর্তী বিজ্ঞাপন ${remaining} সেকেন্ডে`;
+        setTimeout(checkTaskAvailability, remaining * 1000);
+      } else {
+        taskBtn.disabled = false;
+      }
+    }
+
+    // ------- Ads flow (Gigapub unchanged) -------
+    function showAdAndReward(){
+      const taskBtn = byId('task-btn');
+      const adStatus = byId('ad-status');
+      taskBtn.disabled = true;
+      taskBtn.textContent = 'বিজ্ঞাপন লোড হচ্ছে...';
+      adStatus.textContent = '';
+
+      if(window.showGiga){
+        window.showGiga()
+          .then(()=>{
+            adStatus.textContent = 'বিজ্ঞাপন সফলভাবে শেষ হয়েছে!';
+            adStatus.style.color = '#06d6a0';
+            completeTask();
+          })
+          .catch(e=>{
+            console.error('Ad error:', e);
+            adStatus.textContent = 'বিজ্ঞাপন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।';
+            adStatus.style.color = '#ef476f';
+            taskBtn.disabled = false;
+            taskBtn.textContent = `বিজ্ঞাপন দেখুন (+${fmt(AD_REWARD_AMOUNT)} টাকা)`;
+          });
+      }else{
+        // fallback simulation
+        adStatus.textContent = 'বিজ্ঞাপন পরিষেবা অনুপলব্ধ। সিমুলেশন হচ্ছে...';
+        adStatus.style.color = '#ffd166';
+        setTimeout(()=>{
+          completeTask();
+          adStatus.textContent = 'সিমুলেটেড বিজ্ঞাপন সম্পন্ন হয়েছে!';
+          adStatus.style.color = '#06d6a0';
+        }, 1000);
+      }
+    }
+
+    function completeTask(){
+      userData.balance += AD_REWARD_AMOUNT;
+      userData.totalEarnings += AD_REWARD_AMOUNT;
+      userData.dailyTasksCompleted++;
+      userData.lifetimeTasksCompleted++;
+      userData.hourlyTasksCompleted++;
+      userData.tasksDone++;
+      userData.lastTaskTime = new Date();
+
+      updateAll(); saveUserData();
+      setTimeout(checkTaskAvailability, AD_RELOAD_DELAY);
+    }
+
+    // ------- Check-in -------
+    function claimDailyReward(){
+      const today = new Date().toDateString();
+      if(userData.lastCheckin === today){
+        alert('আপনি আজকের পুরস্কার ইতিমধ্যে দাবি করেছেন।'); return;
+      }
+      userData.balance += DAILY_CHECKIN_REWARD;
+      userData.totalEarnings += DAILY_CHECKIN_REWARD;
+      userData.lastCheckin = today;
+      userData.currentStreak++;
+
+      updateAll(); saveUserData();
+
+      const btn = byId('checkin-btn');
+      if(btn){ btn.textContent='কাল ফিরে আসুন'; btn.disabled = true; }
+      alert(`দৈনিক পুরস্কার দাবি করা হয়েছে! আপনি ${fmt(DAILY_CHECKIN_REWARD)} টাকা উপার্জন করেছেন।`);
+    }
+
+    // ------- Telegram verify -------
+    function verifyTelegram(){
+      if(userData.telegramVerified){
+        alert('আপনি আপনার টেলিগ্রাম যোগদান ইতিমধ্যে যাচাই করেছেন।'); return;
+      }
+      // simple client-side verify action (no API) — awards once
+      userData.balance += TELEGRAM_BONUS;
+      userData.totalEarnings += TELEGRAM_BONUS;
+      userData.telegramVerified = true;
+
+      updateAll(); saveUserData(); updateTelegramButton();
+      alert(`টেলিগ্রাম যাচাই করা হয়েছে! আপনি ${fmt(TELEGRAM_BONUS)} টাকা উপার্জন করেছেন।`);
+    }
+
+    // ------- Withdraw -------
+    function requestWithdrawal(){
+      const amount = parseFloat(byId('withdraw-amount').value);
+      const address = byId('withdraw-address').value.trim();
+      const statusDiv = byId('withdrawal-status');
+      const msg = byId('status-message');
+
+      statusDiv.style.display = 'none';
+
+      if(userData.referrals < REQUIRED_REFERRALS){
+        alert(`উত্তোলন করতে আপনার কমপক্ষে ${REQUIRED_REFERRALS} জন রেফারেল থাকতে হবে।`); return;
+      }
+      if(!amount || isNaN(amount)){ alert('অনুগ্রহ করে একটি বৈধ পরিমাণ লিখুন।'); return; }
+      if(amount < MIN_WITHDRAWAL){ alert(`সর্বনিম্ন উত্তোলন ${fmt(MIN_WITHDRAWAL)} টাকা।`); return; }
+      if(amount > userData.balance){ alert('অপর্যাপ্ত ব্যালেন্স।'); return; }
+      if(!address){ alert('অনুগ্রহ করে একটি বৈধ নম্বর লিখুন।'); return; }
+
+      const selectedMethod = document.querySelector('input[name="payment"]:checked').id;
+
+      userData.balance -= amount;
+      userData.withdrawals++;
+      updateAll(); saveUserData();
+
+      statusDiv.style.display = 'block';
+      msg.textContent = `আপনার ${fmt(amount)} টাকা উত্তোলনের অনুরোধ ${selectedMethod.toUpperCase()} এর মাধ্যমে জমা দেওয়া হয়েছে।`;
+
+      byId('withdraw-amount').value = '';
+      byId('withdraw-address').value = '';
+
+      console.log(`Withdrawal Request:
+User ID: ${userData.userId}
+Amount: ${fmt(amount)} টাকা
+Method: ${selectedMethod}
+Address: ${address}
+Date: ${new Date().toLocaleString()}`);
+
+      alert('উত্তোলনের অনুরোধ জমা দেওয়া হয়েছে। আপনার পেমেন্ট শীঘ্রই প্রক্রিয়া করা হবে।');
+    }
+
+    // ------- Utilities -------
+    function byId(id){ return document.getElementById(id) }
+    function setText(id, val){ const el = byId(id); if(el) el.textContent = val; }
+
+    function initApp(){
+      loadUserData();
+      // initialize check-in button state
+      const today = new Date().toDateString();
+      const btn = byId('checkin-btn');
+      if(btn){
+        if(userData.lastCheckin !== today){
+          btn.textContent = 'দৈনিক পুরস্কার দাবি করুন';
+          btn.disabled = false;
+        }else{
+          btn.textContent = 'কাল ফিরে আসুন';
+          btn.disabled = true;
         }
-        
-        // Update cooldown message
-        function updateCooldownMessage() {
-            const now = new Date().getTime();
-            
-            if (gameData.dailyTaps >= 1000 && now < gameData.cooldownEnd) {
-                const remainingTime = gameData.cooldownEnd - now;
-                const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-                
-                elements.cooldownMessage.style.display = 'block';
-                elements.cooldownMessage.textContent = `Cooldown: ${hours}h ${minutes}m ${seconds}s remaining`;
-                elements.tapArea.style.opacity = '0.5';
-                elements.tapArea.style.cursor = 'not-allowed';
-            } else if (gameData.dailyTaps >= 1000 && now >= gameData.cooldownEnd) {
-                // Reset if cooldown is over
-                gameData.dailyTaps = 0;
-                gameData.lastDailyReset = now;
-                gameData.cooldownEnd = 0;
-                updateUI();
-                
-                elements.cooldownMessage.style.display = 'none';
-                elements.tapArea.style.opacity = '1';
-                elements.tapArea.style.cursor = 'pointer';
-            } else {
-                elements.cooldownMessage.style.display = 'none';
-                elements.tapArea.style.opacity = '1';
-                elements.tapArea.style.cursor = 'pointer';
-            }
-        }
-        
-        // Handle tap
-        elements.tapArea.addEventListener('click', () => {
-            const now = new Date().getTime();
-            
-            // Check if in cooldown
-            if (gameData.dailyTaps >= 1000 && now < gameData.cooldownEnd) {
-                return;
-            }
-            
-            // Reset if cooldown is over but taps still at 1000
-            if (gameData.dailyTaps >= 1000 && now >= gameData.cooldownEnd) {
-                gameData.dailyTaps = 0;
-                gameData.lastDailyReset = now;
-                gameData.cooldownEnd = 0;
-            }
-            
-            // Check if we've reached the daily limit
-            if (gameData.dailyTaps >= 1000) {
-                gameData.cooldownEnd = gameData.lastDailyReset + (12 * 60 * 60 * 1000);
-                updateCooldownMessage();
-                return;
-            }
-            
-            gameData.totalTaps++;
-            gameData.coins++;
-            gameData.dailyTaps++;
-            
-            // Every 100 taps = 1 PENGUIN coin
-            if (gameData.dailyTaps % 100 === 0) {
-                gameData.penguinCoins++;
-            }
-            
-            // Create tap effect
-            createTapEffect(event);
-            
-            updateUI();
-        });
-        
-        // Show different pages
-        function showPage(page) {
-            if (page === 'home') {
-                elements.homePage.style.display = 'flex';
-                elements.profilePage.style.display = 'none';
-                
-                // Update nav buttons
-                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('#home-page .nav-button:first-child').classList.add('active');
-            } else if (page === 'profile') {
-                elements.homePage.style.display = 'none';
-                elements.profilePage.style.display = 'flex';
-                
-                // Update nav buttons
-                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('#profile-page .nav-button:last-child').classList.add('active');
-            }
-        }
-        
-        // Generate random referral code
-        function generateReferralCode() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let result = '';
-            for (let i = 0; i < 8; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        }
-        
-        // Copy referral code
-        function copyReferralCode() {
-            navigator.clipboard.writeText(gameData.referralCode);
-            alert('Referral code copied to clipboard!');
-        }
-        
-        // Join channel button
-        function joinChannel() {
-            window.open('https://t.me/PENGUIN70', '_blank');
-            gameData.joinedChannel = true;
-            updateUI();
-            alert('Thank you for joining our Telegram channel!');
-        }
-        
-        // Create snowflakes for background
-        function createSnowflakes() {
-            const body = document.querySelector('body');
-            
-            for (let i = 0; i < 50; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.classList.add('snow');
-                
-                // Random properties
-                const size = Math.random() * 10 + 5;
-                const posX = Math.random() * window.innerWidth;
-                const delay = Math.random() * 5;
-                const opacity = Math.random() * 0.5 + 0.3;
-                const duration = Math.random() * 10 + 5;
-                
-                snowflake.style.width = `${size}px`;
-                snowflake.style.height = `${size}px`;
-                snowflake.style.left = `${posX}px`;
-                snowflake.style.opacity = opacity;
-                snowflake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
-                
-                body.appendChild(snowflake);
-            }
-            
-            // Add animation style
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes fall {
-                    to {
-                        transform: translateY(100vh);
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
-        // Create tap effect
-        function createTapEffect(event) {
-            const tapEffect = document.createElement('div');
-            tapEffect.classList.add('snow');
-            tapEffect.style.width = '20px';
-            tapEffect.style.height = '20px';
-            tapEffect.style.left = `${event.clientX - 10}px`;
-            tapEffect.style.top = `${event.clientY - 10}px`;
-            tapEffect.style.background = 'rgba(255, 255, 255, 0.7)';
-            tapEffect.style.animation = 'rise 1s linear forwards';
-            
-            document.body.appendChild(tapEffect);
-            
-            // Remove after animation
-            setTimeout(() => {
-                tapEffect.remove();
-            }, 1000);
-            
-            // Add animation style if not already present
-            if (!document.getElementById('rise-animation')) {
-                const style = document.createElement('style');
-                style.id = 'rise-animation';
-                style.textContent = `
-                    @keyframes rise {
-                        to {
-                            transform: translateY(-50px);
-                            opacity: 0;
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-        }
-        
-        // Simulate referral (for demo purposes)
-        function simulateReferral() {
-            gameData.referrals++;
-            updateUI();
-        }
-        
-        // Initialize the game when loaded
-        window.addEventListener('load', initGame);
-        
-        // For demo purposes - add a way to simulate referrals
-        window.simulateReferral = simulateReferral;
-    </script>
+      }
+      updateAll();
+      checkTaskAvailability();
+      updateReferralWarning();
+      updateTelegramButton();
+    }
+
+    // Events
+    window.addEventListener('DOMContentLoaded', initApp);
+    const checkinEl = document.getElementById('checkin-btn');
+    if(checkinEl){ checkinEl.addEventListener('click', claimDailyReward); }
+
+    // Fallback for ad system if not present
+    window.AdGigaFallback = function(){ return new Promise(res=>setTimeout(res,1000)); }
+    if(window.showGiga === undefined){ window.showGiga = () => window.AdGigaFallback(); }
+  </script>
 </body>
 </html>
