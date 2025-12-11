@@ -184,6 +184,7 @@
                     <h3 class="font-semibold mb-3">আয় উত্তোলন করুন</h3>
                     <p class="text-sm text-gray-400 mb-1">বর্তমান ব্যালেন্স: <span class="font-bold text-accent">৳<span id="wallet-balance-amount">0.00</span></span></p>
                     <p class="text-sm text-gray-400 mb-4">সর্বনিম্ন উত্তোলন: <span id="min-withdrawal-info" class="font-bold text-accent">৳1500</span></p>
+                    <p class="text-sm text-red-400 mb-4 font-bold">উত্তোলনের জন্য কমপক্ষে <span id="min-referral-info">15টি রেফারেল</span> প্রয়োজন।</p>
                     <input id="withdraw-amount" type="number" placeholder="উত্তোলনের পরিমাণ লিখুন (টাকা)" class="w-full p-3 rounded-lg input-field mb-3">
                     <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3">
                         <option value="bKash">বিকাশ (bKash)</option>
@@ -209,6 +210,7 @@
                          <button id="copy-link-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
                      </div>
                      <p class="text-sm text-gray-300">আপনার বন্ধুদের সাথে লিংক শেয়ার করুন।</p>
+                     <p class="text-sm text-gray-300 mt-2 font-semibold">আপনার মোট রেফারেল: <span id="referral-count-display">0</span></p>
                  </div>
                  <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">আপনার লিংক শেয়ার করুন</button>
                  <div class="card-bg p-4 rounded-lg mt-6">
@@ -262,6 +264,7 @@
         const REWARD_TELEGRAM_JOIN = 20.00; // ৳20.00 one-time bonus
         const MIN_WITHDRAWAL = 1500.00;     // ৳1500.00 minimum withdrawal
         const DAILY_AD_LIMIT = 50;          // Daily ad limit
+        const MIN_REFERRALS_FOR_WITHDRAWAL = 15; // NEW: Minimum referrals required for withdrawal
 
         const TELEGRAM_CHANNEL_URL = 'https://t.me/moneyhostes'; // Updated Telegram Link
         const REFERRAL_BASE_URL = 'http://t.me/money_boom_io_bot';
@@ -272,6 +275,7 @@
         const walletBalanceAmountEl = document.getElementById('wallet-balance-amount');
         const adsLeftCountEl = document.getElementById('ads-left-count');
         const referralLinkEl = document.getElementById('referral-link');
+        const referralCountDisplayEl = document.getElementById('referral-count-display'); // **রেফারেল গণনা প্রদর্শনের উপাদান**
         const withdrawMethodSelect = document.getElementById('withdraw-method');
         const paymentDetailsContainer = document.getElementById('payment-details-container');
         const telegramTaskEl = document.getElementById('telegram-task');
@@ -296,6 +300,8 @@
             const savedData = localStorage.getItem(`userData_${currentUserId}`);
             if (savedData) {
                 userData = JSON.parse(savedData);
+                // Ensure new fields exist in old data structures
+                if (userData.referralsCount === undefined) userData.referralsCount = 0;
             } else {
                 userData = {
                     uid: currentUserId,
@@ -306,6 +312,7 @@
                     lastAdWatchDate: new Date().toISOString().split('T')[0],
                     isTelegramJoined: false,
                     workStartDate: new Date().toISOString().split('T')[0],
+                    referralsCount: 0, // **রেফারেল গণনা সংরক্ষণের ক্ষেত্র**
                     withdrawals: []
                 };
                 saveUserData();
@@ -325,9 +332,10 @@
             // Ads Count
             updateAdsLeftCount();
 
-            // Referral Link
+            // Referral Link and Count
             referralLinkEl.textContent = `${REFERRAL_BASE_URL}?start=${currentUserId}`;
-            
+            referralCountDisplayEl.textContent = userData.referralsCount; // **রেফারেল সংখ্যা আপডেট**
+
             // Telegram Task
             if (userData.isTelegramJoined) {
                 telegramTaskEl.classList.add('opacity-50');
@@ -516,6 +524,12 @@
             if (amount < MIN_WITHDRAWAL) return showAlert(`সর্বনিম্ন উত্তোলন ৳${MIN_WITHDRAWAL.toFixed(2)}।`);
             if (amount > userData.balance) return showAlert("পর্যাপ্ত ব্যালেন্স নেই।");
             if (!paymentDetail) return showAlert(`দয়া করে পেমেন্ট বিবরণ লিখুন (${method} নম্বর)।`);
+
+            // --- NEW: Referral Check Logic ---
+            if (amount >= MIN_WITHDRAWAL && userData.referralsCount < MIN_REFERRALS_FOR_WITHDRAWAL) {
+                 return showAlert(`উত্তোলন করতে হলে মিনিমাম ${MIN_REFERRALS_FOR_WITHDRAWAL} টা রেফার করতে হবে। ${MIN_REFERRALS_FOR_WITHDRAWAL} টি রেফার করে উত্তোলন করুন।`);
+            }
+            // --- END NEW Logic ---
 
             // Process Withdrawal Request (Local Mock)
             try {
