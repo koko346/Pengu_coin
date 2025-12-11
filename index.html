@@ -10,23 +10,27 @@
     <script data-project-id="4833">
         !function(){
             var s=document.currentScript,p=s.getAttribute('data-project-id')||'default';
-            var d=['https://ad.gigapub.tech','https://ru-ad.gigapub.tech'],i=0,t,sc;
+            // Only one source is kept for simplicity and to honor the single ID request
+            var d=['https://ad.gigapub.tech'],i=0,t,sc;
             
             // Function to set up the fallback if Gigapub is not loaded
             function setupGigaFallback() {
-                const adShow = window.show_9797430; // Assuming this is the previous SDK's primary function
+                const adShow = window.show_9797430;
                 if (typeof adShow === 'function' && window.showGiga === undefined) {
                     window.showGiga = () => new Promise((resolve, reject) => {
-                        // Attempt to show the fallback ad and resolve/reject accordingly
                         try {
-                            // The previous SDK might not return a standard Promise, 
-                            // so we rely on its internal mechanism. For this mock, we just resolve.
+                            // Call the legacy ad show for fallback
                             adShow(); 
-                            // A real implementation would need a way to know if the ad was successfully shown/closed.
                             resolve(); 
                         } catch (e) {
                             reject(e);
                         }
+                    });
+                } else if (window.showGiga === undefined) {
+                    // Placeholder for when no ad SDK is available
+                    window.showGiga = () => new Promise((resolve, reject) => {
+                         console.error("No Ad SDK function found.");
+                         reject(new Error("Ad service unavailable."));
                     });
                 }
             }
@@ -39,14 +43,15 @@
                 sc.async=true;
                 sc.src=d[i]+'/script?id='+p;
                 clearTimeout(t);
+                // Set a timeout for loading the script (e.g., 10 seconds)
                 t=setTimeout(function(){
                     sc.onload=sc.onerror=null;
                     sc.src='';
-                    if(++i<d.length)l();
-                    else setupGigaFallback(); // Final attempt to setup fallback if all sources fail
-                },15000);
+                    // Since only one source is kept, we call the fallback directly if it fails
+                    setupGigaFallback(); 
+                },10000);
                 sc.onload=function(){clearTimeout(t)};
-                sc.onerror=function(){clearTimeout(t);if(++i<d.length)l()};
+                sc.onerror=function(){clearTimeout(t); setupGigaFallback()}; // Load fallback on error
                 document.head.appendChild(sc);
             }
             l();
@@ -89,6 +94,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #loader.hidden-fade {
+            opacity: 0;
+            pointer-events: none; /* Disable interaction during fade out */
         }
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.2);
@@ -132,48 +143,37 @@
                     <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg">উইথড্র</button>
                 </div>
                 <section>
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center mb-4">
                         <div>
                             <h2 class="text-lg font-semibold">দৈনিক কাজ</h2>
-                            <p class="text-sm text-gray-400 mb-4">পুরস্কার পেতে কাজগুলি সম্পূর্ণ করুন।</p>
+                            <p class="text-sm text-gray-400">পুরস্কার পেতে কাজগুলি সম্পূর্ণ করুন।</p>
                         </div>
                         <p class="text-sm text-gray-400">বাকি বিজ্ঞাপন: <span id="ads-left-count">...</span></p>
                     </div>
-                    <div class="space-y-3">
-                        <div class="bg-orange-500 p-3 rounded-lg flex items-center justify-between text-black">
-                            <div class="flex flex-col space-y-1">
-                                <div class="flex items-center space-x-3">
-                                    <span class="text-3xl">📺</span>
-                                    <div>
-                                        <h3 class="font-bold">দৈনিক বিজ্ঞাপন দেখুন (৳8)</h3>
-                                        <p class="text-xs font-medium">Gigapub Ads দ্বারা চালিত</p>
+                    <div class="space-y-4">
+                        <div class="bg-orange-500 p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between text-black shadow-lg">
+                            <div class="flex flex-col space-y-2 items-center sm:items-start text-center sm:text-left">
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-5xl">📺</span> <div>
+                                        <h3 class="text-xl font-bold">দৈনিক বিজ্ঞাপন দেখুন (৳8)</h3>
+                                        <p class="text-sm font-medium">Gigapub Ads দ্বারা চালিত</p>
                                     </div>
                                 </div>
                             </div>
-                            <button class="bg-white text-orange-500 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('gigapub')">দেখুন</button>
+                            <button class="mt-4 sm:mt-0 bg-white text-orange-500 font-bold px-8 py-3 rounded-lg text-base btn" onclick="claimReward('gigapub')">দেখুন</button>
                         </div>
                         
-                        <div class="bg-orange-500 p-3 rounded-lg flex items-center justify-between text-black">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">🤩</span><div><h3 class="font-bold">সংক্ষিপ্ত বিজ্ঞাপন দেখুন (৳10)</h3><p class="text-xs font-medium">পুরস্কৃত বিজ্ঞাপন</p></div></div>
-                            <button class="bg-white text-orange-500 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('interstitial')">দাবি করুন</button>
+                        <div id="telegram-task" class="card-bg p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-md">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-3xl">✈️</span>
+                                <div>
+                                    <h3 class="font-semibold text-lg">Telegram চ্যানেলে যোগ দিন (৳20)</h3>
+                                    <p class="text-sm text-gray-400">একবার পুরস্কার</p>
+                                </div>
+                            </div>
+                            <button id="join-telegram-btn" class="mt-4 sm:mt-0 bg-blue-500 text-white font-bold px-8 py-2 rounded-lg text-sm btn">যোগ দিন</button>
                         </div>
-
-                        <div id="telegram-task" class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">✈️</span><div><h3 class="font-semibold">Telegram চ্যানেলে যোগ দিন (৳20)</h3><p class="text-xs text-gray-400">একবার পুরস্কার</p></div></div>
-                            <button id="join-telegram-btn" class="bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm btn">যোগ দিন</button>
-                        </div>
-                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">😎</span><div><h3 class="font-semibold">পুরস্কারের জন্য ক্লিক করুন</h3><p class="text-xs text-gray-400">পুরস্কৃত পপআপ</p></div></div>
-                            <button class="bg-white text-black font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('popup')">দাবি করুন</button>
-                        </div>
-                         <div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">👀</span><div><h3 class="font-semibold">ভিডিও দেখুন</h3><p class="text-xs text-gray-400">ইন-অ্যাপ বিজ্ঞাপন</p></div></div>
-                            <button class="bg-gray-700 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">শুরু করুন</button>
-                        </div>
-                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">🎮</span><div><h3 class="font-semibold">মিনি গেম খেলুন</h3><p class="text-xs text-gray-400">বড় পুরস্কার পান!</p></div></div>
-                            <button class="bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('miniApp')">খেলুন</button>
-                        </div>
+                        
                     </div>
                 </section>
             </div>
@@ -253,19 +253,18 @@
     <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
             <p id="alert-message" class="mb-4 text-white"></p>
-            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg">ঠিক আছে</button>
+            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg"></button> 
         </div>
     </div>
 
     <script>
         // --- Static Configuration & Rewards (টাকায়) ---
         const REWARD_AD_GIGAPUB = 8.00;     // ৳8.00 per Gigapub ad
-        const REWARD_AD_WATCH = 10.00;      // ৳10.00 per short ad (Original task retained)
         const REWARD_TELEGRAM_JOIN = 20.00; // ৳20.00 one-time bonus
         const MIN_WITHDRAWAL = 1500.00;     // ৳1500.00 minimum withdrawal
-        const DAILY_AD_LIMIT = 50;          // A higher limit to allow more earning
+        const DAILY_AD_LIMIT = 50;          // Daily ad limit
 
-        const TELEGRAM_CHANNEL_URL = 'https://t.me/moneyhostes';
+        const TELEGRAM_CHANNEL_URL = 'https://t.me/moneyhostes'; // Updated Telegram Link
         const REFERRAL_BASE_URL = 'http://t.me/money_boom_io_bot';
 
         // --- DOM Elements ---
@@ -422,29 +421,32 @@
             window.open(TELEGRAM_CHANNEL_URL, '_blank');
             
             // 2. Ask User for Confirmation (Assuming they joined)
-            const confirmJoin = await showConfirm("আপনি কি Telegram চ্যানেলে যোগ দিয়েছেন?");
+            // Give the user a moment to switch and join before asking
+            setTimeout(async () => {
+                const confirmJoin = await showConfirm("আপনি কি Telegram চ্যানেলে যোগ দিয়েছেন?");
             
-            if (confirmJoin) {
-                // 3. Apply Reward
-                const newBalance = userData.balance + REWARD_TELEGRAM_JOIN;
-                const newTotalIncome = userData.totalIncome + REWARD_TELEGRAM_JOIN;
+                if (confirmJoin) {
+                    // 3. Apply Reward
+                    const newBalance = userData.balance + REWARD_TELEGRAM_JOIN;
+                    const newTotalIncome = userData.totalIncome + REWARD_TELEGRAM_JOIN;
 
-                userData.balance = newBalance;
-                userData.totalIncome = newTotalIncome;
-                userData.isTelegramJoined = true;
-                saveUserData();
-                updateUI();
-                showAlert(`অভিনন্দন! আপনি Telegram জয়েন বোনাস হিসেবে ৳${REWARD_TELEGRAM_JOIN.toFixed(2)} জিতেছেন।`);
-            } else {
-                showAlert("পুরস্কার পেতে অনুগ্রহ করে চ্যানেলে যোগ দিন।");
-            }
+                    userData.balance = newBalance;
+                    userData.totalIncome = newTotalIncome;
+                    userData.isTelegramJoined = true;
+                    saveUserData();
+                    updateUI();
+                    showAlert(`অভিনন্দন! আপনি Telegram জয়েন বোনাস হিসেবে ৳${REWARD_TELEGRAM_JOIN.toFixed(2)} জিতেছেন।`);
+                } else {
+                    showAlert("পুরস্কার পেতে অনুগ্রহ করে চ্যানেলে যোগ দিন।");
+                }
+            }, 500); // 0.5 sec delay before asking for confirmation
         }
 
         window.claimReward = async function(taskType) {
             const today = new Date().toISOString().split('T')[0];
             
-            // Check daily ad limit for the specific ad tasks
-            if (taskType === 'interstitial' || taskType === 'popup' || taskType === 'inApp' || taskType === 'gigapub') {
+            // Check daily ad limit for the specific ad task
+            if (taskType === 'gigapub') {
                 if (userData.lastAdWatchDate !== today) {
                     userData.dailyAdCount = 0;
                     userData.lastAdWatchDate = today;
@@ -464,29 +466,9 @@
                 adPromise = window.showGiga();
                 adSDKAvailable = true;
             } 
-            // Use the previous SDK for other tasks
-            else if (typeof window.show_9797430 === 'function') {
-                adSDKAvailable = true;
-                switch(taskType) {
-                    case 'interstitial':
-                        adPromise = window.show_9797430();
-                        break;
-                    case 'popup':
-                        adPromise = window.show_9797430('pop');
-                        break;
-                    case 'inApp':
-                        adPromise = window.show_9797430({ type: 'inApp', inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
-                        break;
-                    case 'miniApp':
-                        adPromise = window.show_9797430();
-                        break;
-                    default:
-                        adSDKAvailable = false; // No valid taskType mapped to the old SDK
-                        break;
-                }
-            }
 
             if (!adSDKAvailable) {
+                // This will use the setupGigaFallback placeholder if the script failed
                 return showAlert("বিজ্ঞাপন পরিষেবা এখন উপলব্ধ নেই। দয়া করে পরে চেষ্টা করুন।");
             }
             
@@ -499,26 +481,9 @@
                 let rewardAmount = 0.00;
                 let isAdTask = false;
 
-                switch(taskType) {
-                    case 'gigapub':
-                        rewardAmount = REWARD_AD_GIGAPUB; // ৳8
-                        isAdTask = true;
-                        break;
-                    case 'interstitial':
-                        rewardAmount = REWARD_AD_WATCH; // ৳10
-                        isAdTask = true;
-                        break;
-                    case 'popup':
-                        rewardAmount = 5.00; // Example small reward
-                        isAdTask = true;
-                        break;
-                    case 'miniApp':
-                        rewardAmount = 15.00; // Example higher reward
-                        break;
-                    case 'inApp':
-                        rewardAmount = 2.00;
-                        isAdTask = true;
-                        break;
+                if (taskType === 'gigapub') {
+                    rewardAmount = REWARD_AD_GIGAPUB; // ৳8
+                    isAdTask = true;
                 }
 
                 if (rewardAmount > 0) {
@@ -538,7 +503,7 @@
             }).catch(e => {
                 loader.style.display = 'none'; // Hide loader on error
                 console.error("Ad error:", e);
-                showAlert('বিজ্ঞাপন দেখানো যায়নি। দয়া করে পরে চেষ্টা করুন।');
+                showAlert('বিজ্ঞাপন দেখানো যায়নি অথবা বাতিল করা হয়েছে।');
             });
         }
 
@@ -576,7 +541,6 @@
 
             } catch (error) {
                 showAlert("অনুরোধ জমা দিতে সমস্যা: " + error.message);
-                // In a real app, you would attempt a rollback here if the local save failed, but for localstorage this is less critical.
             }
         }
         
@@ -596,7 +560,12 @@
             document.body.appendChild(textArea);
             textArea.focus(); textArea.select();
             try {
-                document.execCommand('copy');
+                // Use modern Clipboard API if available, fallback to execCommand
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy);
+                } else {
+                    document.execCommand('copy');
+                }
                 showAlert("রেফারেল লিংক কপি করা হয়েছে!");
             } catch (err) {
                 showAlert("লিংক কপি করতে ব্যর্থ।");
@@ -619,15 +588,24 @@
 
         function showAlert(message) {
             document.getElementById('alert-message').textContent = message;
-            document.getElementById('custom-alert').classList.remove('hidden');
-            document.getElementById('alert-ok-btn').onclick = () => {
-                document.getElementById('custom-alert').classList.add('hidden');
+            
+            const alertEl = document.getElementById('custom-alert');
+            const okBtn = document.getElementById('alert-ok-btn');
+            
+            // Remove confirm-specific button if present
+            const cancelBtn = document.getElementById('alert-cancel-btn');
+            if (cancelBtn) cancelBtn.remove();
+            
+            okBtn.textContent = 'ঠিক আছে';
+            okBtn.onclick = () => {
+                alertEl.classList.add('hidden');
             };
+            
+            alertEl.classList.remove('hidden');
         }
 
         function showConfirm(message) {
             return new Promise((resolve) => {
-                // Temporary change to make alert a confirm dialog
                 const alertEl = document.getElementById('custom-alert');
                 const msgEl = document.getElementById('alert-message');
                 const okBtn = document.getElementById('alert-ok-btn');
@@ -692,10 +670,15 @@
             setupEventListeners();
             updateUI();
             
-            // Show main app and hide loader
-            document.getElementById('app-container').classList.add('active');
-            loader.style.display = 'none';
-            navigateTo('home-page'); // Start on home page
+            // Show main app and hide loader after 5 seconds (5000ms)
+            setTimeout(() => {
+                loader.classList.add('hidden-fade');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    document.getElementById('app-container').classList.add('active');
+                    navigateTo('home-page'); // Start on home page
+                }, 500); // Wait for fade-out transition
+            }, 5000); 
         };
     </script>
 </body>
