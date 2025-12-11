@@ -118,7 +118,7 @@
 
     <div id="loader" class="fixed inset-0 z-50">
         <div class="spinner mb-4"></div>
-        <p class="text-white text-lg font-semibold">CashReward লোড হচ্ছে...</p>
+        <p class="text-white text-lg font-semibold">Money Boom 💣.....</p>
     </div>
 
     <div id="app-container" class="min-h-screen flex-col main-page">
@@ -230,8 +230,7 @@
                     <div class="flex justify-between items-center"><p class="font-medium">মোট আয়</p><p id="total-income" class="font-bold text-accent">৳0.00</p></div>
                     <div class="flex justify-between items-center"><p class="font-medium">দেখা বিজ্ঞাপন</p><p id="total-ads-watched" class="font-bold">0</p></div>
                     <div class="flex justify-between items-center"><p class="font-medium">মোট কাজের সময়কাল</p><p id="work-duration" class="font-bold">0 দিন</p></div>
-                    <button id="logout-btn" class="w-full p-3 rounded-lg bg-red-600 font-bold mt-4" onclick="handleLogout()">ডেটা রিসেট (লগআউট)</button>
-                </div>
+                    </div>
             </div>
             
             <div id="notifications-page" class="p-4 space-y-4 sub-page">
@@ -544,13 +543,7 @@
             }
         }
         
-        function handleLogout() {
-             // Removes only the current user's data
-            localStorage.removeItem(`userData_${currentUserId}`);
-            localStorage.removeItem('guestUserId');
-            showAlert("ডেটা সফলভাবে রিসেট করা হয়েছে। অ্যাপ পুনরায় লোড হচ্ছে...");
-            setTimeout(() => window.location.reload(), 1500);
-        }
+        // Removed handleLogout function as requested
 
         function copyReferralLink() {
             const textToCopy = referralLinkEl.textContent;
