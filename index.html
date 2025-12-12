@@ -10,16 +10,13 @@
     <script data-project-id="4833">
         !function(){
             var s=document.currentScript,p=s.getAttribute('data-project-id')||'default';
-            // Only one source is kept for simplicity and to honor the single ID request
             var d=['https://ad.gigapub.tech'],i=0,t,sc;
             
-            // Function to set up the fallback if Gigapub is not loaded
             function setupGigaFallback() {
                 const adShow = window.show_9797430;
                 if (typeof adShow === 'function' && window.showGiga === undefined) {
                     window.showGiga = () => new Promise((resolve, reject) => {
                         try {
-                            // Call the legacy ad show for fallback
                             adShow(); 
                             resolve(); 
                         } catch (e) {
@@ -27,7 +24,6 @@
                         }
                     });
                 } else if (window.showGiga === undefined) {
-                    // Placeholder for when no ad SDK is available
                     window.showGiga = () => new Promise((resolve, reject) => {
                          console.error("No Ad SDK function found.");
                          reject(new Error("Ad service unavailable."));
@@ -35,7 +31,6 @@
                 }
             }
 
-            // Fallback setup immediately in case the timeout is reached
             setupGigaFallback();
 
             function l(){
@@ -43,15 +38,13 @@
                 sc.async=true;
                 sc.src=d[i]+'/script?id='+p;
                 clearTimeout(t);
-                // Set a timeout for loading the script (e.g., 10 seconds)
                 t=setTimeout(function(){
                     sc.onload=sc.onerror=null;
                     sc.src='';
-                    // Since only one source is kept, we call the fallback directly if it fails
                     setupGigaFallback(); 
                 },10000);
                 sc.onload=function(){clearTimeout(t)};
-                sc.onerror=function(){clearTimeout(t); setupGigaFallback()}; // Load fallback on error
+                sc.onerror=function(){clearTimeout(t); setupGigaFallback()}; 
                 document.head.appendChild(sc);
             }
             l();
@@ -204,15 +197,13 @@
             <div id="refer-page" class="p-4 space-y-6 sub-page">
                  <h2 class="text-xl font-bold text-center">বন্ধুকে রেফার করুন এবং উপার্জন করুন</h2>
                  <div class="card-bg p-6 rounded-lg text-center">
-                     <p class="text-gray-400 mb-2">আপনার রেফারেল লিংক</p>
-                     <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
-                         <span id="referral-link" class="text-sm md:text-base font-bold tracking-tight break-all"></span>
-                         <button id="copy-link-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
+                     <div class="bg-yellow-600 p-4 rounded-lg text-white mb-4">
+                         <h3 class="text-lg font-bold mb-2">📢 গুরুত্বপূর্ণ ঘোষণা</h3>
+                         <p class="text-sm font-medium">আপনার রেফারেল লিংক আপনি **Money Boom** এর Start ইন্টারপেজ এ পেয়ে যাবেন।</p>
                      </div>
-                     <p class="text-sm text-gray-300">আপনার বন্ধুদের সাথে লিংক শেয়ার করুন।</p>
                      <p class="text-sm text-gray-300 mt-2 font-semibold">আপনার মোট রেফারেল: <span id="referral-count-display">0</span></p>
                  </div>
-                 <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">আপনার লিংক শেয়ার করুন</button>
+                 <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">রেফার করুন (Telegram)</button>
                  <div class="card-bg p-4 rounded-lg mt-6">
                     <h3 class="font-semibold mb-3 text-center">আপনি কি কারো রেফারেল লিংক দিয়ে এসেছেন?</h3>
                     <p class="text-sm text-gray-400 text-center mb-3">যোগদান নিশ্চিত করতে এবং অতিরিক্ত বোনাস পেতে নীচের লিংকটিতে ক্লিক করুন:</p>
@@ -264,18 +255,21 @@
         const REWARD_TELEGRAM_JOIN = 20.00; // ৳20.00 one-time bonus
         const MIN_WITHDRAWAL = 1500.00;     // ৳1500.00 minimum withdrawal
         const DAILY_AD_LIMIT = 50;          // Daily ad limit
-        const MIN_REFERRALS_FOR_WITHDRAWAL = 15; // NEW: Minimum referrals required for withdrawal
+        const MIN_REFERRALS_FOR_WITHDRAWAL = 15; // Minimum referrals required for withdrawal
 
-        const TELEGRAM_CHANNEL_URL = 'https://t.me/moneyhostes'; // Updated Telegram Link
-        const REFERRAL_BASE_URL = 'http://t.me/money_boom_io_bot';
+        // UPDATED Telegram Link: https://t.me/PUFI83
+        const TELEGRAM_CHANNEL_URL = 'https://t.me/PUFI83'; 
+        const REFERRAL_BASE_URL = 'http://t.me/money_boom_io_bot'; // Kept for consistency, but not used for generating a link here
 
         // --- DOM Elements ---
         const loader = document.getElementById('loader');
         const balanceAmountEl = document.getElementById('balance-amount');
         const walletBalanceAmountEl = document.getElementById('wallet-balance-amount');
         const adsLeftCountEl = document.getElementById('ads-left-count');
-        const referralLinkEl = document.getElementById('referral-link');
-        const referralCountDisplayEl = document.getElementById('referral-count-display'); // **রেফারেল গণনা প্রদর্শনের উপাদান**
+        
+        // REMOVED: referralLinkEl (referral-link)
+        const referralCountDisplayEl = document.getElementById('referral-count-display'); 
+        
         const withdrawMethodSelect = document.getElementById('withdraw-method');
         const paymentDetailsContainer = document.getElementById('payment-details-container');
         const telegramTaskEl = document.getElementById('telegram-task');
@@ -312,7 +306,7 @@
                     lastAdWatchDate: new Date().toISOString().split('T')[0],
                     isTelegramJoined: false,
                     workStartDate: new Date().toISOString().split('T')[0],
-                    referralsCount: 0, // **রেফারেল গণনা সংরক্ষণের ক্ষেত্র**
+                    referralsCount: 0, 
                     withdrawals: []
                 };
                 saveUserData();
@@ -332,9 +326,9 @@
             // Ads Count
             updateAdsLeftCount();
 
-            // Referral Link and Count
-            referralLinkEl.textContent = `${REFERRAL_BASE_URL}?start=${currentUserId}`;
-            referralCountDisplayEl.textContent = userData.referralsCount; // **রেফারেল সংখ্যা আপডেট**
+            // Referral Count
+            // REMOVED: referralLinkEl.textContent
+            referralCountDisplayEl.textContent = userData.referralsCount; 
 
             // Telegram Task
             if (userData.isTelegramJoined) {
@@ -428,7 +422,6 @@
             window.open(TELEGRAM_CHANNEL_URL, '_blank');
             
             // 2. Ask User for Confirmation (Assuming they joined)
-            // Give the user a moment to switch and join before asking
             setTimeout(async () => {
                 const confirmJoin = await showConfirm("আপনি কি Telegram চ্যানেলে যোগ দিয়েছেন?");
             
@@ -475,7 +468,6 @@
             } 
 
             if (!adSDKAvailable) {
-                // This will use the setupGigaFallback placeholder if the script failed
                 return showAlert("বিজ্ঞাপন পরিষেবা এখন উপলব্ধ নেই। দয়া করে পরে চেষ্টা করুন।");
             }
             
@@ -525,11 +517,11 @@
             if (amount > userData.balance) return showAlert("পর্যাপ্ত ব্যালেন্স নেই।");
             if (!paymentDetail) return showAlert(`দয়া করে পেমেন্ট বিবরণ লিখুন (${method} নম্বর)।`);
 
-            // --- NEW: Referral Check Logic ---
+            // --- Referral Check Logic ---
             if (amount >= MIN_WITHDRAWAL && userData.referralsCount < MIN_REFERRALS_FOR_WITHDRAWAL) {
                  return showAlert(`উত্তোলন করতে হলে মিনিমাম ${MIN_REFERRALS_FOR_WITHDRAWAL} টা রেফার করতে হবে। ${MIN_REFERRALS_FOR_WITHDRAWAL} টি রেফার করে উত্তোলন করুন।`);
             }
-            // --- END NEW Logic ---
+            // --- END Logic ---
 
             // Process Withdrawal Request (Local Mock)
             try {
@@ -557,37 +549,18 @@
             }
         }
         
-        // Removed handleLogout function as requested
-
-        function copyReferralLink() {
-            const textToCopy = referralLinkEl.textContent;
-            const textArea = document.createElement("textarea");
-            textArea.style.position = 'fixed'; textArea.style.top = '-100px';
-            textArea.value = textToCopy;
-            document.body.appendChild(textArea);
-            textArea.focus(); textArea.select();
-            try {
-                // Use modern Clipboard API if available, fallback to execCommand
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(textToCopy);
-                } else {
-                    document.execCommand('copy');
-                }
-                showAlert("রেফারেল লিংক কপি করা হয়েছে!");
-            } catch (err) {
-                showAlert("লিংক কপি করতে ব্যর্থ।");
-            }
-            document.body.removeChild(textArea);
-        }
+        // REMOVED: copyReferralLink function
         
         function shareReferralLink() {
-            const text = `CashReward এ যোগ দিন এবং টাকা উপার্জন করুন! বোনাস পেতে এই লিংকটি ব্যবহার করুন: ${referralLinkEl.textContent}`;
+            // Updated to simply redirect to the Telegram bot's start page as the link is not displayed here
+            const text = `CashReward এ যোগ দিন এবং টাকা উপার্জন করুন! আপনার রেফারেল লিংক পেতে Money Boom Bot টি Start করুন: ${REFERRAL_BASE_URL}`;
             if (navigator.share) {
-                navigator.share({ title: 'CashReward এ যোগ দিন!', text: text, url: referralLinkEl.textContent })
+                navigator.share({ title: 'CashReward এ যোগ দিন!', text: text, url: REFERRAL_BASE_URL })
                     .catch((error) => console.error("Share failed:", error));
             } else {
-                copyReferralLink();
-                showAlert("শেয়ার ফিচার উপলব্ধ নেই। এর পরিবর্তে রেফারেল লিংক কপি করা হয়েছে!");
+                // Fallback for non-supporting browsers
+                window.open(REFERRAL_BASE_URL, '_blank');
+                showAlert("আপনার বন্ধুদের বলুন Money Boom Bot এ গিয়ে আপনার রেফারেল কোড দিয়ে শুরু করতে!");
             }
         }
 
@@ -599,7 +572,6 @@
             const alertEl = document.getElementById('custom-alert');
             const okBtn = document.getElementById('alert-ok-btn');
             
-            // Remove confirm-specific button if present
             const cancelBtn = document.getElementById('alert-cancel-btn');
             if (cancelBtn) cancelBtn.remove();
             
@@ -617,7 +589,6 @@
                 const msgEl = document.getElementById('alert-message');
                 const okBtn = document.getElementById('alert-ok-btn');
                 
-                // Add a cancel button for confirmation
                 let cancelBtn = document.getElementById('alert-cancel-btn');
                 if (!cancelBtn) {
                     cancelBtn = document.createElement('button');
@@ -652,7 +623,7 @@
                 if (link.dataset.page === pageId) link.classList.add('active', 'text-accent');
             });
         }
-        window.navigateTo = navigateTo; // Make it globally accessible for inline calls
+        window.navigateTo = navigateTo; 
 
         function setupEventListeners() {
             document.querySelectorAll('.nav-link').forEach(link => {
@@ -662,7 +633,7 @@
                 });
             });
             document.getElementById('notification-bell').addEventListener('click', () => { navigateTo('notifications-page'); });
-            document.getElementById('copy-link-btn').addEventListener('click', copyReferralLink);
+            // REMOVED: document.getElementById('copy-link-btn').addEventListener('click', copyReferralLink);
             document.getElementById('share-btn').addEventListener('click', shareReferralLink);
             document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
             document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
