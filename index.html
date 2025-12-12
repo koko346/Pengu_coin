@@ -328,19 +328,23 @@
             // Referral Count (Hidden in the new UI, but kept in data)
             if(referralCountDisplayEl) referralCountDisplayEl.textContent = userData.referralsCount; 
 
-            // Telegram Task
+            // --- Telegram Task Correction ---
             if (userData.isTelegramJoined) {
-                telegramTaskEl.classList.add('opacity-50');
-                joinTelegramBtn.textContent = 'দাবি করা হয়েছে';
-                joinTelegramBtn.disabled = true;
+                // Task is completed: Allow user to click to go to channel, but no reward logic.
+                telegramTaskEl.classList.add('opacity-75'); // Slightly dim the task
+                joinTelegramBtn.textContent = 'চ্যানেলে যান';
+                joinTelegramBtn.disabled = false; // Keep button enabled
                 joinTelegramBtn.classList.remove('bg-blue-500');
-                joinTelegramBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                joinTelegramBtn.classList.add('bg-gray-600', 'hover:bg-gray-700'); // Change color to indicate task completion but still clickable
             } else {
-                 joinTelegramBtn.disabled = false;
+                 // Task is not completed: Keep button enabled for joining and claiming reward.
+                 telegramTaskEl.classList.remove('opacity-75');
                  joinTelegramBtn.textContent = 'যোগ দিন';
-                 joinTelegramBtn.classList.remove('bg-gray-600', 'cursor-not-allowed');
+                 joinTelegramBtn.disabled = false;
+                 joinTelegramBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
                  joinTelegramBtn.classList.add('bg-blue-500');
             }
+            // --- END Telegram Task Correction ---
 
             // Profile Data
             profileIdEl.textContent = `ID: ${userData.uid}`;
@@ -414,12 +418,17 @@
         // --- Handlers ---
         
         async function handleTelegramJoin() {
-            if (userData.isTelegramJoined) return showAlert("আপনি ইতিমধ্যেই এই কাজটি সম্পন্ন করেছেন।");
             
             // 1. Open Telegram Link
             window.open(TELEGRAM_CHANNEL_URL, '_blank');
             
-            // 2. Ask User for Confirmation (Assuming they joined)
+            // If already joined, just open the link and exit, no further logic.
+            if (userData.isTelegramJoined) {
+                showAlert("আপনি ইতিমধ্যেই Telegram টাস্ক সম্পন্ন করেছেন।");
+                return;
+            }
+            
+            // 2. Ask User for Confirmation (Only if not already joined)
             setTimeout(async () => {
                 const confirmJoin = await showConfirm("আপনি কি Telegram চ্যানেলে যোগ দিয়েছেন?");
             
@@ -635,7 +644,11 @@
             // Removed: document.getElementById('share-btn').addEventListener('click', shareReferralLink);
             document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
             document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
+            
+            // --- Telegram Button Event Listener ---
             document.getElementById('join-telegram-btn').addEventListener('click', handleTelegramJoin);
+            // --- END Telegram Button Event Listener ---
+
             withdrawMethodSelect.addEventListener('change', updateDynamicPaymentFields);
         }
 
