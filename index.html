@@ -201,9 +201,8 @@
                          <h3 class="text-lg font-bold mb-2">📢 গুরুত্বপূর্ণ ঘোষণা</h3>
                          <p class="text-sm font-medium">আপনার রেফারেল লিংক আপনি **Money Boom** এর Start ইন্টারপেজ এ পেয়ে যাবেন।</p>
                      </div>
-                     <p class="text-sm text-gray-300 mt-2 font-semibold">আপনার মোট রেফারেল: <span id="referral-count-display">0</span></p>
                  </div>
-                 <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">রেফার করুন (Telegram)</button>
+                 
                  <div class="card-bg p-4 rounded-lg mt-6">
                     <h3 class="font-semibold mb-3 text-center">আপনি কি কারো রেফারেল লিংক দিয়ে এসেছেন?</h3>
                     <p class="text-sm text-gray-400 text-center mb-3">যোগদান নিশ্চিত করতে এবং অতিরিক্ত বোনাস পেতে নীচের লিংকটিতে ক্লিক করুন:</p>
@@ -267,7 +266,7 @@
         const walletBalanceAmountEl = document.getElementById('wallet-balance-amount');
         const adsLeftCountEl = document.getElementById('ads-left-count');
         
-        // REMOVED: referralLinkEl (referral-link)
+        // Removed elements from DOM structure, but keeping the variable declaration for JS consistency
         const referralCountDisplayEl = document.getElementById('referral-count-display'); 
         
         const withdrawMethodSelect = document.getElementById('withdraw-method');
@@ -326,9 +325,8 @@
             // Ads Count
             updateAdsLeftCount();
 
-            // Referral Count
-            // REMOVED: referralLinkEl.textContent
-            referralCountDisplayEl.textContent = userData.referralsCount; 
+            // Referral Count (Hidden in the new UI, but kept in data)
+            if(referralCountDisplayEl) referralCountDisplayEl.textContent = userData.referralsCount; 
 
             // Telegram Task
             if (userData.isTelegramJoined) {
@@ -549,10 +547,10 @@
             }
         }
         
-        // REMOVED: copyReferralLink function
+        // Removed: copyReferralLink function
         
         function shareReferralLink() {
-            // Updated to simply redirect to the Telegram bot's start page as the link is not displayed here
+            // This function is no longer called by a button, but kept as a placeholder if needed elsewhere.
             const text = `CashReward এ যোগ দিন এবং টাকা উপার্জন করুন! আপনার রেফারেল লিংক পেতে Money Boom Bot টি Start করুন: ${REFERRAL_BASE_URL}`;
             if (navigator.share) {
                 navigator.share({ title: 'CashReward এ যোগ দিন!', text: text, url: REFERRAL_BASE_URL })
@@ -633,8 +631,8 @@
                 });
             });
             document.getElementById('notification-bell').addEventListener('click', () => { navigateTo('notifications-page'); });
-            // REMOVED: document.getElementById('copy-link-btn').addEventListener('click', copyReferralLink);
-            document.getElementById('share-btn').addEventListener('click', shareReferralLink);
+            // Removed: document.getElementById('copy-link-btn').addEventListener('click', copyReferralLink);
+            // Removed: document.getElementById('share-btn').addEventListener('click', shareReferralLink);
             document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
             document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
             document.getElementById('join-telegram-btn').addEventListener('click', handleTelegramJoin);
