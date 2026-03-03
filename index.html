@@ -1,38 +1,413 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CashReward: টাকা আয় করুন</title>
-    
-    <script src='//libtl.com/sdk.js' data-zone='9797430' data-sdk='show_9797430'></script>
-    
-    <script data-project-id="4833">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>X MONEY IO · cartoon earn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Neue', 'Segoe UI', 'Fredoka', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f9e57c 0%, #ffb347 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* cartoon clouds and blobs */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 70% 30% 60% 40% / 50% 60% 40% 50%;
+            top: 10px;
+            left: -50px;
+            z-index: 0;
+            box-shadow: 0 0 0 15px rgba(255,250,210,0.2);
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: rgba(255, 255, 180, 0.3);
+            border-radius: 40% 60% 30% 70% / 60% 30% 70% 40%;
+            bottom: -70px;
+            right: -70px;
+            z-index: 0;
+        }
+
+        .phone-container {
+            max-width: 400px;
+            width: 100%;
+            background-color: #fff9e6;
+            border-radius: 40px 40px 30px 30px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.25), 0 0 0 6px #ffdd99, 0 0 0 10px #ffeecc;
+            padding: 18px 14px 20px 14px;
+            position: relative;
+            z-index: 10;
+            border: 3px solid #ffb554;
+            backdrop-filter: blur(2px);
+        }
+
+        /* cute notch */
+        .notch {
+            width: 130px;
+            height: 26px;
+            background: #ffe0a3;
+            border-radius: 40px;
+            margin: -30px auto 16px auto;
+            border: 3px solid #f5a623;
+            box-shadow: inset 0 -2px 5px rgba(255,255,200,0.8);
+        }
+
+        /* top bar with unique id */
+        .unique-bar {
+            background: #c1e6f5;
+            border-radius: 40px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 3px solid #1f8bb7;
+            box-shadow: 0 5px 0 #0f5b7a, 0 6px 10px rgba(0,0,0,0.15);
+            margin-bottom: 16px;
+            color: #1e3d4a;
+            font-weight: 700;
+            font-size: 0.9rem;
+            background-image: repeating-linear-gradient(45deg, #daf0ff 0px, #daf0ff 8px, #b1e0f0 8px, #b1e0f0 16px);
+        }
+
+        .unique-id {
+            background: white;
+            padding: 4px 14px;
+            border-radius: 40px;
+            border: 2px solid #fd9700;
+            font-family: monospace;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #2c3e50;
+            box-shadow: inset 0 -2px 0 #c0c0c0;
+            font-size: 0.9rem;
+        }
+
+        /* main content panels (scrollable area) */
+        .panel-container {
+            max-height: 460px;
+            overflow-y: auto;
+            border-radius: 30px;
+            margin-bottom: 12px;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #ffb554 #ffeaa6;
+        }
+        .panel-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .panel-container::-webkit-scrollbar-track {
+            background: #ffeaa6;
+            border-radius: 20px;
+        }
+        .panel-container::-webkit-scrollbar-thumb {
+            background: #ff9f1c;
+            border-radius: 20px;
+            border: 1px solid #b36b00;
+        }
+
+        /* content panels */
+        .panel {
+            display: none;
+            background: rgba(255, 251, 235, 0.8);
+            border-radius: 40px 40px 30px 30px;
+            border: 4px solid #ffb554;
+            padding: 18px 14px;
+            backdrop-filter: blur(3px);
+            box-shadow: inset 0 -3px 0 #ed9e2d, 0 10px 15px rgba(255,140,0,0.2);
+            margin-bottom: 6px;
+        }
+
+        .panel.active-panel {
+            display: block;
+        }
+
+        /* coin style */
+        .coin-icon {
+            background: radial-gradient(circle at 30% 30%, #fff1a0, #f7b731);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: 3px solid #fff2b5;
+            box-shadow: 0 4px 0 #b37100;
+            margin-right: 6px;
+        }
+
+        .home-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #fdeec9;
+            border-radius: 40px;
+            padding: 16px;
+            border: 3px solid #f3981c;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .btn-earn {
+            background: #6ec96e;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 16px;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #003300;
+            border: 4px solid #fdffb3;
+            box-shadow: 0 6px 0 #2d6e2d, 0 8px 16px #98fb98;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.05s linear;
+        }
+
+        .btn-earn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2d6e2d, 0 5px 12px yellowgreen;
+        }
+
+        .refer-link-box {
+            background: #d5e6f5;
+            border: 3px dashed #fd7e14;
+            border-radius: 30px;
+            padding: 12px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .copy-btn {
+            background: #ff9f1c;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-weight: 800;
+            color: #2c1a00;
+            border: 2px solid white;
+            box-shadow: 0 3px 0 #b16d0e;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.05s;
+            white-space: nowrap;
+        }
+        .copy-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #b16d0e;
+        }
+
+        .task-item {
+            background: #cfe9dc;
+            border-radius: 40px;
+            padding: 14px;
+            border: 3px solid #2e9c77;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 5px 0 #1d6b4f;
+        }
+
+        .task-amount {
+            background: #ffd966;
+            border-radius: 30px;
+            padding: 8px 14px;
+            font-weight: 800;
+            color: #3d2600;
+            font-size: 0.9rem;
+        }
+
+        .btn-verify {
+            background: #ffb703;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 20px;
+            font-weight: 800;
+            box-shadow: 0 4px 0 #b16d0e;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-verify:disabled {
+            opacity: 0.5;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b16d0e;
+            pointer-events: none;
+        }
+
+        .withdraw-methods {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .method {
+            background: #ffdbb5;
+            border-radius: 30px;
+            padding: 8px 14px;
+            border: 2px solid #fc9f2b;
+            font-weight: 700;
+            box-shadow: 0 3px 0 #bb7a25;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .method.active-method {
+            background: #f9b84a;
+            border: 4px solid #b64516;
+            font-weight: 900;
+            transform: scale(1.02);
+            box-shadow: 0 5px 0 #9b4a1a;
+            color: #2d1500;
+        }
+
+        .calc-box {
+            background: #ebd5b3;
+            border-radius: 30px;
+            padding: 14px;
+            margin: 12px 0;
+            border: 3px solid #a96f1f;
+        }
+
+        .withdraw-rules {
+            background: #ffe0d9;
+            border-radius: 25px;
+            padding: 14px;
+            border: 4px solid #ff4d4d;
+            box-shadow: 0 4px 0 #b30000;
+        }
+
+        .red-highlight {
+            color: #c40000;
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            background: #ffffb0;
+            padding: 4px 10px;
+            border-radius: 40px;
+            display: inline-block;
+            border: 2px solid red;
+            text-shadow: none;
+        }
+
+        .footer-currency {
+            background: #f9cf8b;
+            border-radius: 30px;
+            padding: 8px;
+            font-weight: bold;
+            text-align: center;
+            border: 3px solid #b2711b;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        input {
+            background: white;
+            border: 4px solid #ff9f1c;
+            border-radius: 50px;
+            padding: 10px 16px;
+            font-size: 1rem;
+            width: 100%;
+            margin: 5px 0;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .bdt-preview {
+            font-size: 1.8rem;
+            background: #fffbbc;
+            border-radius: 40px;
+            padding: 6px 16px;
+            border: 3px solid green;
+            text-align: center;
+        }
+
+        /* bottom navigation tabs */
+        .tab-bar {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: #ffddbb;
+            padding: 8px 6px;
+            border-radius: 60px;
+            border: 3px solid #fea82f;
+            box-shadow: 0 5px 0 #bb7a25;
+        }
+
+        .tab-btn {
+            background: #fee6a9;
+            border: 3px solid #ff9f1c;
+            border-radius: 40px;
+            padding: 8px 12px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #7b3f00;
+            box-shadow: 0 4px 0 #bb7a25, 0 4px 8px #ffd966;
+            cursor: pointer;
+            transition: 0.07s ease;
+            text-shadow: 1px 1px 0 #ffeeaa;
+            flex: 1 1 0px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: #ffbe5c;
+            box-shadow: 0 2px 0 #bb7a25, 0 6px 10px #ffb347;
+            transform: translateY(2px);
+        }
+        .balance-show {
+            background: #f6d365;
+            border-radius: 30px;
+            padding: 8px 14px;
+            margin-bottom: 12px;
+            font-weight: 900;
+            font-size: 1.2rem;
+            border: 3px solid #a75800;
+            text-align: center;
+        }
+    </style>
+    <!-- comic-neue font -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- GigaPub Ad SDK (fallback included) -->
+    <script data-project-id="YOUR_PROJECT_ID" id="gigapub-sdk">
         !function(){
             var s=document.currentScript,p=s.getAttribute('data-project-id')||'default';
-            var d=['https://ad.gigapub.tech'],i=0,t,sc;
-            
-            function setupGigaFallback() {
-                const adShow = window.show_9797430;
-                if (typeof adShow === 'function' && window.showGiga === undefined) {
-                    window.showGiga = () => new Promise((resolve, reject) => {
-                        try {
-                            adShow(); 
-                            resolve(); 
-                        } catch (e) {
-                            reject(e);
-                        }
-                    });
-                } else if (window.showGiga === undefined) {
-                    window.showGiga = () => new Promise((resolve, reject) => {
-                         console.error("No Ad SDK function found.");
-                         reject(new Error("Ad service unavailable."));
-                    });
-                }
-            }
-
-            setupGigaFallback();
-
+            var d=['https://ad.gigapub.tech','https://ru-ad.gigapub.tech'],i=0,t,sc;
             function l(){
                 sc=document.createElement('script');
                 sc.async=true;
@@ -41,634 +416,295 @@
                 t=setTimeout(function(){
                     sc.onload=sc.onerror=null;
                     sc.src='';
-                    setupGigaFallback(); 
-                },10000);
+                    if(++i<d.length)l();
+                },15000);
                 sc.onload=function(){clearTimeout(t)};
-                sc.onerror=function(){clearTimeout(t); setupGigaFallback()}; 
+                sc.onerror=function(){clearTimeout(t);if(++i<d.length)l()};
                 document.head.appendChild(sc);
             }
             l();
         }();
     </script>
-
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Tailwind configuration for custom colors and fonts */
-        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #ffffff; }
-        .dark-bg { background-color: #121212; }
-        .card-bg { background-color: #1e1e1e; }
-        .border-accent { border-color: #ff8c00; }
-        .text-accent { color: #ff8c00; }
-        .btn, .btn-accent, .btn-outline-accent { transition: all 0.2s ease-in-out; transform: scale(1); }
-        .btn:active, .btn-accent:active, .btn-outline-accent:active { transform: scale(0.95); }
-        .btn-accent { background-color: #ff8c00; color: #121212; font-weight: bold; }
-        .btn-accent:hover { background-color: #e67e00; }
-        .btn-outline-accent { border: 1px solid #ff8c00; color: #ff8c00; }
-        .btn-outline-accent:hover { background-color: #ff8c00; color: #121212; }
-        .input-field { background-color: #2c2c2c; border: 1px solid #444; }
-        .main-page { display: none; }
-        .main-page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
-        .sub-page { display: none; }
-        .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        .bottom-nav a.active { color: #ff8c00; }
-        .notification-dot {
-            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
-            background-color: #ef4444; border-radius: 50%; border: 2px solid #121212; display: none;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Professional Loading Screen Style */
-        #loader {
-            background-color: #121212; /* Dark background */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-            transition: opacity 0.5s ease-in-out;
-        }
-        #loader.hidden-fade {
-            opacity: 0;
-            pointer-events: none; /* Disable interaction during fade out */
-        }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #ff8c00; /* Accent color */
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
 </head>
-<body class="max-w-md mx-auto">
+<body>
+<div class="phone-container">
+    <div class="notch"></div>
 
-    <div id="loader" class="fixed inset-0 z-50">
-        <div class="spinner mb-4"></div>
-        <p class="text-white text-lg font-semibold">Money Boom 💣.....</p>
+    <!-- unique id bar -->
+    <div class="unique-bar">
+        <span>🆔 YOUR ID</span>
+        <span class="unique-id" id="uniqueIdDisplay">X7K92M</span>
     </div>
 
-    <div id="app-container" class="min-h-screen flex-col main-page">
-        <header class="flex items-center justify-between p-4 sticky top-0 bg-opacity-80 backdrop-blur-md z-10 dark-bg">
-            <h1 class="text-xl font-bold">CashReward</h1>
-            <div class="flex items-center space-x-4">
-                <div id="notification-bell" class="relative cursor-pointer">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <div id="notification-dot" class="notification-dot"></div>
-                </div>
-                <i data-lucide="user" class="w-6 h-6 cursor-pointer" onclick="navigateTo('profile-page')"></i>
+    <!-- scrollable panel container (content area) -->
+    <div class="panel-container">
+        <!-- HOME PANEL -->
+        <div id="homePanel" class="panel active-panel">
+            <div style="text-align: center; margin-bottom: 12px;">
+                <span class="coin-icon">💰</span>
+                <span style="font-size: 1.8rem; font-weight: 900;">X MONEY IO</span>
             </div>
-        </header>
-
-        <main class="flex-grow">
-            <div id="home-page" class="p-4 space-y-6 sub-page">
-                <div class="card-bg p-4 rounded-lg flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-400 text-sm">আপনার ব্যালেন্স</p>
-                        <p class="text-3xl font-bold">৳<span id="balance-amount">0.00</span></p>
-                    </div>
-                    <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg">উইথড্র</button>
-                </div>
-                <section>
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h2 class="text-lg font-semibold">দৈনিক কাজ</h2>
-                            <p class="text-sm text-gray-400">পুরস্কার পেতে কাজগুলি সম্পূর্ণ করুন।</p>
-                        </div>
-                        <p class="text-sm text-gray-400">বাকি বিজ্ঞাপন: <span id="ads-left-count">...</span></p>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="bg-orange-500 p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between text-black shadow-lg">
-                            <div class="flex flex-col space-y-2 items-center sm:items-start text-center sm:text-left">
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-5xl">📺</span> <div>
-                                        <h3 class="text-xl font-bold">দৈনিক বিজ্ঞাপন দেখুন (৳8)</h3>
-                                        <p class="text-sm font-medium">Gigapub Ads দ্বারা চালিত</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="mt-4 sm:mt-0 bg-white text-orange-500 font-bold px-8 py-3 rounded-lg text-base btn" onclick="claimReward('gigapub')">দেখুন</button>
-                        </div>
-                        
-                        <div id="telegram-task" class="card-bg p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-md">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-3xl">✈️</span>
-                                <div>
-                                    <h3 class="font-semibold text-lg">Telegram চ্যানেলে যোগ দিন (৳20)</h3>
-                                    <p class="text-sm text-gray-400">একবার পুরস্কার</p>
-                                </div>
-                            </div>
-                            <button id="join-telegram-btn" class="mt-4 sm:mt-0 bg-blue-500 text-white font-bold px-8 py-2 rounded-lg text-sm btn">যোগ দিন</button>
-                        </div>
-                        
-                    </div>
-                </section>
+            <div class="home-stats">
+                <div class="stat-row"><span class="coin-icon">🪙</span> <span>Earn 0.02 USDT / ad</span></div>
+                <div class="stat-row"><span>👀</span> <span>Watch up to <strong>500 ads/day</strong></span></div>
+                <div class="stat-row"><span>💼</span> <span>Your balance: <strong id="balanceDisplay">8.42 USDT</strong></span></div>
+                <div class="stat-row"><span>🔑</span> <span>Unique ID: <strong id="uniqueIdInHome">X7K92M</strong></span></div>
             </div>
-
-            <div id="wallet-page" class="p-4 space-y-6 sub-page">
-                <h2 class="text-xl font-bold text-center">আপনার ওয়ালেট (৳)</h2>
-                <div class="card-bg p-4 rounded-lg">
-                    <h3 class="font-semibold mb-3">আয় উত্তোলন করুন</h3>
-                    <p class="text-sm text-gray-400 mb-1">বর্তমান ব্যালেন্স: <span class="font-bold text-accent">৳<span id="wallet-balance-amount">0.00</span></span></p>
-                    <p class="text-sm text-gray-400 mb-4">সর্বনিম্ন উত্তোলন: <span id="min-withdrawal-info" class="font-bold text-accent">৳1500</span></p>
-                    <p class="text-sm text-red-400 mb-4 font-bold">উত্তোলনের জন্য কমপক্ষে <span id="min-referral-info">15টি রেফারেল</span> প্রয়োজন।</p>
-                    <input id="withdraw-amount" type="number" placeholder="উত্তোলনের পরিমাণ লিখুন (টাকা)" class="w-full p-3 rounded-lg input-field mb-3">
-                    <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3">
-                        <option value="bKash">বিকাশ (bKash)</option>
-                        <option value="Nagad">নগদ (Nagad)</option>
-                    </select>
-                    <div id="payment-details-container">
-                        <input id="payment-detail-input" type="text" placeholder="আপনার bKash নম্বর লিখুন" class="w-full p-3 rounded-lg input-field">
-                    </div>
-                    <button id="withdraw-btn" class="w-full p-3 rounded-lg btn-accent mt-3">উত্তোলন অনুরোধ করুন</button>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">উত্তোলনের ইতিহাস</h3>
-                    <div id="withdrawal-history-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <div id="refer-page" class="p-4 space-y-6 sub-page">
-                 <h2 class="text-xl font-bold text-center">বন্ধুকে রেফার করুন এবং উপার্জন করুন</h2>
-                 <div class="card-bg p-6 rounded-lg text-center">
-                     <div class="bg-yellow-600 p-4 rounded-lg text-white mb-4">
-                         <h3 class="text-lg font-bold mb-2">📢 গুরুত্বপূর্ণ ঘোষণা</h3>
-                         <p class="text-sm font-medium">আপনার রেফারেল লিংক আপনি **Money Boom** এর Start ইন্টারপেজ এ পেয়ে যাবেন।</p>
-                     </div>
-                 </div>
-                 
-                 <div class="card-bg p-4 rounded-lg mt-6">
-                    <h3 class="font-semibold mb-3 text-center">আপনি কি কারো রেফারেল লিংক দিয়ে এসেছেন?</h3>
-                    <p class="text-sm text-gray-400 text-center mb-3">যোগদান নিশ্চিত করতে এবং অতিরিক্ত বোনাস পেতে নীচের লিংকটিতে ক্লিক করুন:</p>
-                    <a id="referrer-link-placeholder" href="http://t.me/money_boom_io_bot" target="_blank" class="w-full p-3 rounded-lg btn-outline-accent flex justify-center items-center">
-                        <i data-lucide="link" class="w-5 h-5 mr-2"></i>
-                        রেফারেল লিংক
-                    </a>
-                 </div>
-            </div>
-
-            <div id="profile-page" class="p-4 space-y-6 sub-page">
-                <h2 class="text-xl font-bold text-center mb-4">প্রোফাইল</h2>
-                <div class="flex flex-col items-center">
-                    <p id="profile-id" class="text-gray-400">ID: ...</p>
-                </div>
-                <div class="card-bg p-4 rounded-lg space-y-3">
-                    <div class="flex justify-between items-center"><p class="font-medium">মোট আয়</p><p id="total-income" class="font-bold text-accent">৳0.00</p></div>
-                    <div class="flex justify-between items-center"><p class="font-medium">দেখা বিজ্ঞাপন</p><p id="total-ads-watched" class="font-bold">0</p></div>
-                    <div class="flex justify-between items-center"><p class="font-medium">মোট কাজের সময়কাল</p><p id="work-duration" class="font-bold">0 দিন</p></div>
-                    </div>
-            </div>
-            
-            <div id="notifications-page" class="p-4 space-y-4 sub-page">
-                <h2 class="text-xl font-bold text-center">নোটিফিকেশন</h2>
-                <div id="notifications-list" class="space-y-3">
-                    <p class="text-gray-400 text-center">কোন নোটিফিকেশন নেই।</p>
-                </div>
-            </div>
-        </main>
-
-        <nav class="bottom-nav sticky bottom-0 grid grid-cols-4 items-center text-center py-2 card-bg">
-            <a href="#" class="nav-link active text-accent" data-page="home-page"><i data-lucide="home" class="mx-auto w-6 h-6"></i><span class="text-xs">হোম</span></a>
-            <a href="#" class="nav-link" data-page="wallet-page"><i data-lucide="wallet" class="mx-auto w-6 h-6"></i><span class="text-xs">ওয়ালেট</span></a>
-            <a href="#" class="nav-link" data-page="refer-page"><i data-lucide="users" class="mx-auto w-6 h-6"></i><span class="text-xs">রেফার</span></a>
-            <a href="#" class="nav-link" data-page="profile-page"><i data-lucide="user" class="mx-auto w-6 h-6"></i><span class="text-xs">প্রোফাইল</span></a>
-        </nav>
-    </div>
-    
-    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
-            <p id="alert-message" class="mb-4 text-white"></p>
-            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg"></button> 
+            <button class="btn-earn" id="watchAdBtn">▶ WATCH AD +0.02</button>
+            <div style="margin-top: 14px; font-size: 0.95rem; background: #b1e0f0; border-radius: 30px; padding: 8px; border:2px solid #0077b6; text-align: center;">🎉 start earning instantly!</div>
         </div>
+
+        <!-- REFERRAL PANEL -->
+        <div id="referPanel" class="panel">
+            <h2 style="display: flex; gap: 6px; font-size: 1.5rem;">👥 Referral Program <span class="coin-icon">🎁</span></h2>
+            <div class="refer-link-box" id="referLinkDisplay">
+                <span id="referLinkText">http://t.me/X_MONEYIO_BOT?start=X7K92M</span>
+                <button class="copy-btn" id="copyReferBtn">📋 COPY</button>
+            </div>
+            <p style="margin: 10px 0;">👤 Your Unique ID: <strong id="uniqueIdRefer">X7K92M</strong></p>
+            <div style="background: #a8e6cf; border-radius: 40px; padding: 14px; border: 3px solid #3b9e7a;">
+                <p>🎁 Invite friends & earn!</p>
+                <p>📈 Total referrals: <strong id="referralCount">1</strong> </p>
+                <p>🔗 Share your link – unlimited rewards</p>
+            </div>
+        </div>
+
+        <!-- TASK PANEL -->
+        <div id="taskPanel" class="panel">
+            <h2 style="font-size: 1.6rem;">📌 Complete Task</h2>
+            <div class="task-item">
+                <span class="coin-icon">📢</span>
+                <div style="flex:1; font-size: 0.9rem;"><strong>Join channel</strong><br>https://t.me/PUFI83</div>
+                <span class="task-amount">+0.20 USDT</span>
+            </div>
+            <button class="btn-verify" id="verifyTaskBtn" style="margin: 18px 0 6px; width: 100%;">✅ VERIFY & EARN</button>
+            <p style="color: #3c5a2b; font-size: 0.9rem;">After joining, click verify (one time reward)</p>
+        </div>
+
+        <!-- WITHDRAW PANEL -->
+        <div id="withdrawPanel" class="panel">
+            <h2 style="font-size: 1.6rem;">💸 Withdraw</h2>
+            <!-- total balance show inside withdraw -->
+            <div class="balance-show" id="withdrawBalanceShow">💰 Total Balance: 8.42 USDT</div>
+            <div class="withdraw-methods" id="methodContainer">
+                <span class="method" data-method="nagad">🟢 Nagad</span>
+                <span class="method" data-method="bkash">🟣 bKash</span>
+                <span class="method" data-method="ton">🔵 TON</span>
+            </div>
+            <div class="calc-box">
+                <p><strong>💲 1 USDT = 125 BDT</strong></p>
+                <label>Enter USDT amount</label>
+                <input type="number" id="usdtInput" placeholder="e.g. 10" min="0" step="0.1" value="12">
+                <div style="display: flex; justify-content: space-between; margin: 10px 4px;">
+                    <span>💵 BDT value:</span>
+                    <span class="bdt-preview" id="bdtPreview">1500</span>
+                </div>
+            </div>
+
+            <!-- STRICT WITHDRAW RULES (RED HIGHLIGHT) -->
+            <div class="withdraw-rules">
+                <span class="red-highlight">🔴 MINIMUM: 10 USDT</span><br>
+                <span class="red-highlight" style="margin-top: 6px;">🔴 MUST REFER 5 USERS</span>
+                <p style="font-weight: bold; color: #a10000;">(current referrals: <span id="referCountForWithdraw">1</span> / 5 )</p>
+            </div>
+
+            <button id="withdrawBtn" style="background: #fd8b78; width:100%; padding:16px; border-radius:50px; border:4px solid #fff; font-weight:800; margin-top:14px; box-shadow:0 5px 0 #b33000;">REQUEST WITHDRAW</button>
+            <p style="text-align: center; margin-top: 6px; font-size:0.9rem;">Min 5 refs & 10 USDT</p>
+        </div>
+    </div> <!-- end panel-container -->
+
+    <!-- bottom navigation tabs (moved to bottom) -->
+    <div class="tab-bar">
+        <div class="tab-btn active" data-tab="home">🏠 HOME</div>
+        <div class="tab-btn" data-tab="refer">👥 REFER</div>
+        <div class="tab-btn" data-tab="task">📢 TASK</div>
+        <div class="tab-btn" data-tab="withdraw">💸 WITHDRAW</div>
     </div>
 
-    <script>
-        // --- Static Configuration & Rewards (টাকায়) ---
-        const REWARD_AD_GIGAPUB = 8.00;     // ৳8.00 per Gigapub ad
-        const REWARD_TELEGRAM_JOIN = 20.00; // ৳20.00 one-time bonus
-        const MIN_WITHDRAWAL = 1500.00;     // ৳1500.00 minimum withdrawal
-        const DAILY_AD_LIMIT = 50;          // Daily ad limit
-        const MIN_REFERRALS_FOR_WITHDRAWAL = 15; // Minimum referrals required for withdrawal
+    <!-- cute footer -->
+    <div class="footer-currency">
+        ⚡ Cartoon earn · every click counts ⚡
+    </div>
+</div>
 
-        // UPDATED Telegram Link: https://t.me/PUFI83
-        const TELEGRAM_CHANNEL_URL = 'https://t.me/PUFI83'; 
-        const REFERRAL_BASE_URL = 'http://t.me/money_boom_io_bot'; // Kept for consistency, but not used for generating a link here
-
-        // --- DOM Elements ---
-        const loader = document.getElementById('loader');
-        const balanceAmountEl = document.getElementById('balance-amount');
-        const walletBalanceAmountEl = document.getElementById('wallet-balance-amount');
-        const adsLeftCountEl = document.getElementById('ads-left-count');
-        
-        // Removed elements from DOM structure, but keeping the variable declaration for JS consistency
-        const referralCountDisplayEl = document.getElementById('referral-count-display'); 
-        
-        const withdrawMethodSelect = document.getElementById('withdraw-method');
-        const paymentDetailsContainer = document.getElementById('payment-details-container');
-        const telegramTaskEl = document.getElementById('telegram-task');
-        const joinTelegramBtn = document.getElementById('join-telegram-btn');
-
-        // Profile Elements
-        const profileIdEl = document.getElementById('profile-id');
-        const totalIncomeEl = document.getElementById('total-income');
-        const totalAdsWatchedEl = document.getElementById('total-ads-watched');
-        const workDurationEl = document.getElementById('work-duration');
-
-        // --- Local Data Structure and Initialization ---
-        let userData = {};
-        let currentUserId = localStorage.getItem('guestUserId');
-
-        // Initial Data Setup
-        function initializeUserData() {
-            if (!currentUserId) {
-                currentUserId = 'GUEST_' + Math.random().toString(36).substring(2, 10).toUpperCase();
-                localStorage.setItem('guestUserId', currentUserId);
-            }
-            const savedData = localStorage.getItem(`userData_${currentUserId}`);
-            if (savedData) {
-                userData = JSON.parse(savedData);
-                // Ensure new fields exist in old data structures
-                if (userData.referralsCount === undefined) userData.referralsCount = 0;
-            } else {
-                userData = {
-                    uid: currentUserId,
-                    balance: 0.00,
-                    totalIncome: 0.00,
-                    adsWatched: 0,
-                    dailyAdCount: 0,
-                    lastAdWatchDate: new Date().toISOString().split('T')[0],
-                    isTelegramJoined: false,
-                    workStartDate: new Date().toISOString().split('T')[0],
-                    referralsCount: 0, 
-                    withdrawals: []
-                };
-                saveUserData();
-            }
-        }
-
-        function saveUserData() {
-            localStorage.setItem(`userData_${currentUserId}`, JSON.stringify(userData));
-        }
-
-        // --- UI Update & Logic ---
-        function updateUI() {
-            // Balance
-            balanceAmountEl.textContent = userData.balance.toFixed(2);
-            walletBalanceAmountEl.textContent = userData.balance.toFixed(2);
-
-            // Ads Count
-            updateAdsLeftCount();
-
-            // Referral Count (Hidden in the new UI, but kept in data)
-            if(referralCountDisplayEl) referralCountDisplayEl.textContent = userData.referralsCount; 
-
-            // --- Telegram Task Correction ---
-            if (userData.isTelegramJoined) {
-                // Task is completed: Allow user to click to go to channel, but no reward logic.
-                telegramTaskEl.classList.add('opacity-75'); // Slightly dim the task
-                joinTelegramBtn.textContent = 'চ্যানেলে যান';
-                joinTelegramBtn.disabled = false; // Keep button enabled
-                joinTelegramBtn.classList.remove('bg-blue-500');
-                joinTelegramBtn.classList.add('bg-gray-600', 'hover:bg-gray-700'); // Change color to indicate task completion but still clickable
-            } else {
-                 // Task is not completed: Keep button enabled for joining and claiming reward.
-                 telegramTaskEl.classList.remove('opacity-75');
-                 joinTelegramBtn.textContent = 'যোগ দিন';
-                 joinTelegramBtn.disabled = false;
-                 joinTelegramBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                 joinTelegramBtn.classList.add('bg-blue-500');
-            }
-            // --- END Telegram Task Correction ---
-
-            // Profile Data
-            profileIdEl.textContent = `ID: ${userData.uid}`;
-            totalIncomeEl.textContent = `৳${userData.totalIncome.toFixed(2)}`;
-            totalAdsWatchedEl.textContent = userData.adsWatched;
-            workDurationEl.textContent = calculateWorkDuration();
-
-            // Withdrawal Fields
-            updateDynamicPaymentFields();
-            loadWithdrawalHistory();
-        }
-
-        function calculateWorkDuration() {
-            const startDate = new Date(userData.workStartDate);
-            const today = new Date();
-            const diffTime = Math.abs(today - startDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            return `${diffDays} দিন`;
-        }
-
-        function updateAdsLeftCount() {
-            const today = new Date().toISOString().split('T')[0];
-            if (userData.lastAdWatchDate !== today) {
-                userData.dailyAdCount = 0;
-                userData.lastAdWatchDate = today;
-                saveUserData();
-            }
-            const adsLeft = Math.max(0, DAILY_AD_LIMIT - userData.dailyAdCount);
-            adsLeftCountEl.textContent = adsLeft;
-        }
-
-        function updateDynamicPaymentFields() {
-            const selectedMethod = withdrawMethodSelect.value.toLowerCase();
-            let placeholder = "বিবরণ লিখুন";
-            if (selectedMethod.includes('bkash')) placeholder = "আপনার bKash নম্বর লিখুন";
-            if (selectedMethod.includes('nagad')) placeholder = "আপনার Nagad নম্বর লিখুন";
-            
-            paymentDetailsContainer.innerHTML = `<input id="payment-detail-input" type="text" placeholder="${placeholder}" class="w-full p-3 rounded-lg input-field">`;
-        }
-
-        function loadWithdrawalHistory() {
-            const historyList = document.getElementById('withdrawal-history-list');
-            const withdrawals = userData.withdrawals;
-            
-            if (withdrawals.length === 0) {
-                historyList.innerHTML = '<p class="text-gray-400 text-center">আপনি এখনো কোন উত্তোলন করেননি।</p>';
-                return;
-            }
-
-            withdrawals.sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
-            historyList.innerHTML = '';
-
-            withdrawals.forEach(request => {
-                const status = request.status;
-                let statusColor = 'text-yellow-400';
-                if (status === 'approved') statusColor = 'text-green-400';
-                else if (status === 'rejected') statusColor = 'text-red-400';
-                
-                const date = new Date(request.requestedAt).toLocaleDateString('bn-BD') || 'N/A';
-
-                historyList.innerHTML += `<div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                    <div>
-                        <p class="font-semibold">৳${request.amount.toFixed(2)} - ${request.method}</p>
-                        <p class="text-xs text-gray-400">${date}</p>
-                    </div>
-                    <p class="font-bold ${statusColor} capitalize">${status}</p>
-                </div>`;
-            });
-        }
-
-        // --- Handlers ---
-        
-        async function handleTelegramJoin() {
-            
-            // 1. Open Telegram Link
-            window.open(TELEGRAM_CHANNEL_URL, '_blank');
-            
-            // If already joined, just open the link and exit, no further logic.
-            if (userData.isTelegramJoined) {
-                showAlert("আপনি ইতিমধ্যেই Telegram টাস্ক সম্পন্ন করেছেন।");
-                return;
-            }
-            
-            // 2. Ask User for Confirmation (Only if not already joined)
-            setTimeout(async () => {
-                const confirmJoin = await showConfirm("আপনি কি Telegram চ্যানেলে যোগ দিয়েছেন?");
-            
-                if (confirmJoin) {
-                    // 3. Apply Reward
-                    const newBalance = userData.balance + REWARD_TELEGRAM_JOIN;
-                    const newTotalIncome = userData.totalIncome + REWARD_TELEGRAM_JOIN;
-
-                    userData.balance = newBalance;
-                    userData.totalIncome = newTotalIncome;
-                    userData.isTelegramJoined = true;
-                    saveUserData();
-                    updateUI();
-                    showAlert(`অভিনন্দন! আপনি Telegram জয়েন বোনাস হিসেবে ৳${REWARD_TELEGRAM_JOIN.toFixed(2)} জিতেছেন।`);
-                } else {
-                    showAlert("পুরস্কার পেতে অনুগ্রহ করে চ্যানেলে যোগ দিন।");
-                }
-            }, 500); // 0.5 sec delay before asking for confirmation
-        }
-
-        window.claimReward = async function(taskType) {
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Check daily ad limit for the specific ad task
-            if (taskType === 'gigapub') {
-                if (userData.lastAdWatchDate !== today) {
-                    userData.dailyAdCount = 0;
-                    userData.lastAdWatchDate = today;
-                    saveUserData();
-                }
-
-                if (userData.dailyAdCount >= DAILY_AD_LIMIT) {
-                    return showAlert("আপনার আজকের বিজ্ঞাপন দেখার সীমা শেষ হয়েছে।");
-                }
-            }
-            
-            let adPromise;
-            let adSDKAvailable = false;
-            
-            // Use Gigapub for the 'gigapub' task
-            if (taskType === 'gigapub' && typeof window.showGiga === 'function') {
-                adPromise = window.showGiga();
-                adSDKAvailable = true;
-            } 
-
-            if (!adSDKAvailable) {
-                return showAlert("বিজ্ঞাপন পরিষেবা এখন উপলব্ধ নেই। দয়া করে পরে চেষ্টা করুন।");
-            }
-            
-            // Show loading spinner while ad is being prepared
-            loader.style.display = 'flex';
-
-            adPromise.then(() => {
-                loader.style.display = 'none'; // Hide loader after ad attempt
-
-                let rewardAmount = 0.00;
-                let isAdTask = false;
-
-                if (taskType === 'gigapub') {
-                    rewardAmount = REWARD_AD_GIGAPUB; // ৳8
-                    isAdTask = true;
-                }
-
-                if (rewardAmount > 0) {
-                    userData.balance += rewardAmount;
-                    userData.totalIncome += rewardAmount;
-                    if (isAdTask) {
-                        userData.dailyAdCount += 1;
-                        userData.adsWatched += 1;
-                    }
-                    saveUserData();
-                    updateUI();
-                    showAlert(`অভিনন্দন! আপনি ৳${rewardAmount.toFixed(2)} জিতেছেন।`);
-                } else {
-                    showAlert("কাজ সম্পন্ন হয়েছে।");
-                }
-                
-            }).catch(e => {
-                loader.style.display = 'none'; // Hide loader on error
-                console.error("Ad error:", e);
-                showAlert('বিজ্ঞাপন দেখানো যায়নি অথবা বাতিল করা হয়েছে।');
-            });
-        }
-
-        async function handleWithdrawal() {
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            const method = withdrawMethodSelect.value;
-            const paymentDetailInput = document.getElementById('payment-detail-input');
-            const paymentDetail = paymentDetailInput ? paymentDetailInput.value.trim() : '';
-
-            if (isNaN(amount) || amount <= 0) return showAlert("দয়া করে সঠিক পরিমাণ লিখুন।");
-            if (amount < MIN_WITHDRAWAL) return showAlert(`সর্বনিম্ন উত্তোলন ৳${MIN_WITHDRAWAL.toFixed(2)}।`);
-            if (amount > userData.balance) return showAlert("পর্যাপ্ত ব্যালেন্স নেই।");
-            if (!paymentDetail) return showAlert(`দয়া করে পেমেন্ট বিবরণ লিখুন (${method} নম্বর)।`);
-
-            // --- Referral Check Logic ---
-            if (amount >= MIN_WITHDRAWAL && userData.referralsCount < MIN_REFERRALS_FOR_WITHDRAWAL) {
-                 return showAlert(`উত্তোলন করতে হলে মিনিমাম ${MIN_REFERRALS_FOR_WITHDRAWAL} টা রেফার করতে হবে। ${MIN_REFERRALS_FOR_WITHDRAWAL} টি রেফার করে উত্তোলন করুন।`);
-            }
-            // --- END Logic ---
-
-            // Process Withdrawal Request (Local Mock)
-            try {
-                // Deduct balance
-                userData.balance -= amount;
-
-                // Add to history
-                userData.withdrawals.push({
-                    amount: amount, 
-                    method: method, 
-                    paymentDetail: paymentDetail, 
-                    status: "pending", // Always pending locally
-                    requestedAt: new Date().toISOString()
-                });
-                
-                saveUserData();
-                updateUI();
-
-                showAlert("উত্তোলন অনুরোধ সফলভাবে জমা হয়েছে! দয়া করে অপেক্ষ করুন।");
-                document.getElementById('withdraw-amount').value = '';
-                paymentDetailInput.value = '';
-
-            } catch (error) {
-                showAlert("অনুরোধ জমা দিতে সমস্যা: " + error.message);
-            }
-        }
-        
-        // Removed: copyReferralLink function
-        
-        function shareReferralLink() {
-            // This function is no longer called by a button, but kept as a placeholder if needed elsewhere.
-            const text = `CashReward এ যোগ দিন এবং টাকা উপার্জন করুন! আপনার রেফারেল লিংক পেতে Money Boom Bot টি Start করুন: ${REFERRAL_BASE_URL}`;
-            if (navigator.share) {
-                navigator.share({ title: 'CashReward এ যোগ দিন!', text: text, url: REFERRAL_BASE_URL })
-                    .catch((error) => console.error("Share failed:", error));
-            } else {
-                // Fallback for non-supporting browsers
-                window.open(REFERRAL_BASE_URL, '_blank');
-                showAlert("আপনার বন্ধুদের বলুন Money Boom Bot এ গিয়ে আপনার রেফারেল কোড দিয়ে শুরু করতে!");
-            }
-        }
-
-        // --- Utility Functions ---
-
-        function showAlert(message) {
-            document.getElementById('alert-message').textContent = message;
-            
-            const alertEl = document.getElementById('custom-alert');
-            const okBtn = document.getElementById('alert-ok-btn');
-            
-            const cancelBtn = document.getElementById('alert-cancel-btn');
-            if (cancelBtn) cancelBtn.remove();
-            
-            okBtn.textContent = 'ঠিক আছে';
-            okBtn.onclick = () => {
-                alertEl.classList.add('hidden');
-            };
-            
-            alertEl.classList.remove('hidden');
-        }
-
-        function showConfirm(message) {
-            return new Promise((resolve) => {
-                const alertEl = document.getElementById('custom-alert');
-                const msgEl = document.getElementById('alert-message');
-                const okBtn = document.getElementById('alert-ok-btn');
-                
-                let cancelBtn = document.getElementById('alert-cancel-btn');
-                if (!cancelBtn) {
-                    cancelBtn = document.createElement('button');
-                    cancelBtn.id = 'alert-cancel-btn';
-                    cancelBtn.className = 'btn-outline-accent px-6 py-2 rounded-lg ml-3';
-                    alertEl.querySelector('.bg-gray-800').appendChild(cancelBtn);
-                }
-                
-                cancelBtn.textContent = 'না';
-
-                msgEl.textContent = message;
-                alertEl.classList.remove('hidden');
-
-                okBtn.textContent = 'হ্যাঁ';
-                okBtn.onclick = () => {
-                    alertEl.classList.add('hidden');
-                    resolve(true);
-                };
-                
-                cancelBtn.onclick = () => {
-                    alertEl.classList.add('hidden');
-                    resolve(false);
-                };
-            });
-        }
-        
-        function navigateTo(pageId) {
-            document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active', 'text-accent');
-                if (link.dataset.page === pageId) link.classList.add('active', 'text-accent');
-            });
-        }
-        window.navigateTo = navigateTo; 
-
-        function setupEventListeners() {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigateTo(link.dataset.page);
-                });
-            });
-            document.getElementById('notification-bell').addEventListener('click', () => { navigateTo('notifications-page'); });
-            // Removed: document.getElementById('copy-link-btn').addEventListener('click', copyReferralLink);
-            // Removed: document.getElementById('share-btn').addEventListener('click', shareReferralLink);
-            document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
-            document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
-            
-            // --- Telegram Button Event Listener ---
-            document.getElementById('join-telegram-btn').addEventListener('click', handleTelegramJoin);
-            // --- END Telegram Button Event Listener ---
-
-            withdrawMethodSelect.addEventListener('change', updateDynamicPaymentFields);
-        }
-
-        // --- App Start ---
-        window.onload = () => {
-            lucide.createIcons();
-            initializeUserData();
-            setupEventListeners();
-            updateUI();
-            
-            // Show main app and hide loader after 5 seconds (5000ms)
-            setTimeout(() => {
-                loader.classList.add('hidden-fade');
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    document.getElementById('app-container').classList.add('active');
-                    navigateTo('home-page'); // Start on home page
-                }, 500); // Wait for fade-out transition
-            }, 5000); 
+<script>
+    (function() {
+        // ---------- UNIQUE ID ----------
+        const userId = 'X7K92M'; 
+        const uniqueElements = {
+            uniqueIdDisplay: document.getElementById('uniqueIdDisplay'),
+            uniqueIdInHome: document.getElementById('uniqueIdInHome'),
+            uniqueIdRefer: document.getElementById('uniqueIdRefer'),
+            referLinkText: document.getElementById('referLinkText'),
         };
-    </script>
+        for (let key in uniqueElements) {
+            if (uniqueElements[key]) {
+                if (key === 'referLinkText') uniqueElements[key].innerText = `http://t.me/X_MONEYIO_BOT?start=${userId}`;
+                else uniqueElements[key].innerText = userId;
+            }
+        }
+
+        // ---------- STATE ----------
+        let balance = 8.42;        // USDT
+        let totalReferrals = 1;     // start from 1
+        let taskClaimed = false;    // task only once
+
+        // DOM elements
+        const balanceSpan = document.getElementById('balanceDisplay');
+        const withdrawBalanceShow = document.getElementById('withdrawBalanceShow');
+        const referralCountSpan = document.getElementById('referralCount');
+        const referCountWithdraw = document.getElementById('referCountForWithdraw');
+        const usdtInput = document.getElementById('usdtInput');
+        const bdtPreview = document.getElementById('bdtPreview');
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        const watchBtn = document.getElementById('watchAdBtn');
+        const verifyBtn = document.getElementById('verifyTaskBtn');
+        const copyBtn = document.getElementById('copyReferBtn');
+        const methodSpans = document.querySelectorAll('.method');
+
+        // ---------- TAB SWITCHING ----------
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panels = {
+            home: document.getElementById('homePanel'),
+            refer: document.getElementById('referPanel'),
+            task: document.getElementById('taskPanel'),
+            withdraw: document.getElementById('withdrawPanel')
+        };
+
+        function activateTab(tabId) {
+            tabs.forEach(t => t.classList.remove('active'));
+            Object.values(panels).forEach(p => p.classList.remove('active-panel'));
+            const activeTab = Array.from(tabs).find(t => t.dataset.tab === tabId);
+            if (activeTab) activeTab.classList.add('active');
+            if (panels[tabId]) panels[tabId].classList.add('active-panel');
+        }
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabId = tab.dataset.tab;
+                if (tabId) activateTab(tabId);
+            });
+        });
+
+        // ---------- REFRESH UI ----------
+        function refreshUI() {
+            balanceSpan.innerText = balance.toFixed(2) + ' USDT';
+            withdrawBalanceShow.innerText = `💰 Total Balance: ${balance.toFixed(2)} USDT`;
+            referralCountSpan.innerText = totalReferrals;
+            referCountWithdraw.innerText = totalReferrals;
+
+            const usdtVal = parseFloat(usdtInput.value) || 0;
+            const bdt = usdtVal * 125;
+            bdtPreview.innerText = bdt.toFixed(0);
+        }
+
+        // ---------- WATCH AD (with GigaPub) ----------
+        window.showGiga = window.showGiga || function() {
+            return new Promise((resolve, reject) => {
+                // fallback if SDK not loaded
+                if (typeof window.AdGigaFallback !== 'undefined' && window.AdGigaFallback) {
+                    return window.AdGigaFallback().then(resolve).catch(reject);
+                }
+                // simulate success for demo if real SDK missing (but project ID must be replaced)
+                console.warn('GigaPub SDK not fully ready, using fallback simulation');
+                setTimeout(resolve, 500); // pretend ad watched
+            });
+        };
+
+        watchBtn.addEventListener('click', () => {
+            // disable button temporarily to avoid double click
+            watchBtn.disabled = true;
+            watchBtn.innerText = '⏳ LOADING AD...';
+            window.showGiga()
+                .then(() => {
+                    // reward
+                    balance += 0.02;
+                    if (balance > 999) balance = 999;
+                    refreshUI();
+                    alert('🎬 +0.02 USDT earned! (Ad watched successfully)');
+                })
+                .catch(e => {
+                    alert('⚠️ Ad failed to load, try again. (Error: ' + (e.message || 'unknown') + ')');
+                })
+                .finally(() => {
+                    watchBtn.disabled = false;
+                    watchBtn.innerText = '▶ WATCH AD +0.02';
+                });
+        });
+
+        // ---------- VERIFY TASK (only once) ----------
+        verifyBtn.addEventListener('click', () => {
+            if (taskClaimed) {
+                alert('⚠️ You have already claimed this task reward.');
+                return;
+            }
+            // simulate join verification
+            balance += 0.20;
+            refreshUI();
+            taskClaimed = true;
+            verifyBtn.disabled = true;
+            verifyBtn.innerText = '✓ ALREADY CLAIMED';
+            alert('🎉 Task completed! +0.20 USDT');
+        });
+
+        // ---------- WITHDRAW METHOD SELECT (bold) ----------
+        methodSpans.forEach(m => {
+            m.addEventListener('click', (e) => {
+                methodSpans.forEach(el => el.classList.remove('active-method'));
+                m.classList.add('active-method');
+            });
+        });
+        // default active first
+        if (methodSpans.length) methodSpans[0].classList.add('active-method');
+
+        // ---------- COPY LINK ----------
+        copyBtn.addEventListener('click', () => {
+            const link = document.getElementById('referLinkText').innerText;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('✅ Referral link copied!');
+            }).catch(() => {
+                prompt('Manual copy:', link);
+            });
+        });
+
+        // ---------- WITHDRAW ACTION ----------
+        withdrawBtn.addEventListener('click', () => {
+            const usdtAmount = parseFloat(usdtInput.value) || 0;
+            if (usdtAmount < 10) {
+                alert('❌ Minimum withdraw is 10 USDT!');
+                return;
+            }
+            if (totalReferrals < 5) {
+                alert(`❌ You need at least 5 referrals. Current: ${totalReferrals}`);
+                return;
+            }
+            if (usdtAmount > balance) {
+                alert(`❌ Insufficient balance. You have ${balance.toFixed(2)} USDT`);
+                return;
+            }
+
+            balance -= usdtAmount;
+            refreshUI();
+            alert(`✅ Withdrawal request for ${usdtAmount} USDT (${(usdtAmount*125).toFixed(0)} BDT) submitted! (demo)`);
+        });
+
+        // ---------- REFERRAL INCREASE (double click on refer panel for demo) ----------
+        document.getElementById('referPanel').addEventListener('dblclick', () => {
+            totalReferrals += 1;
+            if (totalReferrals > 10) totalReferrals = 10;
+            refreshUI();
+            alert(`➕ Referral count increased to ${totalReferrals} (double-click demo)`);
+        });
+
+        // Input change event
+        usdtInput.addEventListener('input', refreshUI);
+
+        // initial refresh
+        refreshUI();
+    })();
+</script>
+
+<!-- floating cartoon elements -->
+<div style="position: fixed; bottom: 10px; left: 10px; opacity:0.3; font-size: 40px; z-index:0;">🪙🪙</div>
+<div style="position: fixed; top: 10px; right: 10px; opacity:0.3; font-size: 60px; z-index:0;">💰</div>
 </body>
 </html>
