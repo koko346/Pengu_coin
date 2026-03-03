@@ -248,6 +248,25 @@
             color: #3d2600;
             font-size: 0.9rem;
         }
+        .join-btn {
+            background: #2e9c77;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-weight: 800;
+            color: white;
+            border: 3px solid #f9e57c;
+            box-shadow: 0 4px 0 #1b5e46;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.05s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .join-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1b5e46;
+        }
 
         .btn-verify {
             background: #ffb703;
@@ -447,7 +466,7 @@
             <div class="home-stats">
                 <div class="stat-row"><span class="coin-icon">🪙</span> <span>Earn 0.02 USDT / ad</span></div>
                 <div class="stat-row"><span>👀</span> <span>Watch up to <strong>500 ads/day</strong></span></div>
-                <div class="stat-row"><span>💼</span> <span>Your balance: <strong id="balanceDisplay">8.42 USDT</strong></span></div>
+                <div class="stat-row"><span>💼</span> <span>Your balance: <strong id="balanceDisplay">0.00 USDT</strong></span></div>
                 <div class="stat-row"><span>🔑</span> <span>Unique ID: <strong id="uniqueIdInHome">X7K92M</strong></span></div>
             </div>
             <button class="btn-earn" id="watchAdBtn">▶ WATCH AD +0.02</button>
@@ -469,23 +488,26 @@
             </div>
         </div>
 
-        <!-- TASK PANEL -->
+        <!-- TASK PANEL (with join button) -->
         <div id="taskPanel" class="panel">
             <h2 style="font-size: 1.6rem;">📌 Complete Task</h2>
-            <div class="task-item">
-                <span class="coin-icon">📢</span>
-                <div style="flex:1; font-size: 0.9rem;"><strong>Join channel</strong><br>https://t.me/PUFI83</div>
-                <span class="task-amount">+0.20 USDT</span>
+            <div class="task-item" style="flex-direction: column; align-items: stretch;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="coin-icon">📢</span>
+                    <div style="flex:1; font-size: 0.9rem;"><strong>Join official channel</strong><br>@PUFI83</div>
+                    <span class="task-amount">+0.20 USDT</span>
+                </div>
+                <a href="https://t.me/PUFI83" target="_blank" id="joinChannelBtn" class="join-btn" style="text-align: center; width: 100%;">🔔 JOIN CHANNEL</a>
             </div>
             <button class="btn-verify" id="verifyTaskBtn" style="margin: 18px 0 6px; width: 100%;">✅ VERIFY & EARN</button>
-            <p style="color: #3c5a2b; font-size: 0.9rem;">After joining, click verify (one time reward)</p>
+            <p style="color: #3c5a2b; font-size: 0.9rem;">1. Join channel 2. Click verify (one time reward)</p>
         </div>
 
         <!-- WITHDRAW PANEL -->
         <div id="withdrawPanel" class="panel">
             <h2 style="font-size: 1.6rem;">💸 Withdraw</h2>
             <!-- total balance show inside withdraw -->
-            <div class="balance-show" id="withdrawBalanceShow">💰 Total Balance: 8.42 USDT</div>
+            <div class="balance-show" id="withdrawBalanceShow">💰 Total Balance: 0.00 USDT</div>
             <div class="withdraw-methods" id="methodContainer">
                 <span class="method" data-method="nagad">🟢 Nagad</span>
                 <span class="method" data-method="bkash">🟣 bKash</span>
@@ -544,10 +566,42 @@
             }
         }
 
+        // ---------- LOCAL STORAGE KEYS ----------
+        const STORAGE_KEYS = {
+            BALANCE: 'xmoney_balance',
+            REFERRALS: 'xmoney_referrals',
+            TASK_CLAIMED: 'xmoney_task_claimed'
+        };
+
+        // ---------- LOAD SAVED DATA FROM LOCALSTORAGE ----------
+        function loadSavedData() {
+            // ব্যালেন্স লোড (নতুন ইউজার হলে ০)
+            const savedBalance = localStorage.getItem(STORAGE_KEYS.BALANCE);
+            balance = savedBalance ? parseFloat(savedBalance) : 0.00;
+            
+            // রেফারেল কাউন্ট লোড (নতুন ইউজার হলে ১ - ডেমো)
+            const savedReferrals = localStorage.getItem(STORAGE_KEYS.REFERRALS);
+            totalReferrals = savedReferrals ? parseInt(savedReferrals) : 1;
+            
+            // টাস্ক ক্লেইম স্ট্যাটাস লোড
+            const savedTaskClaimed = localStorage.getItem(STORAGE_KEYS.TASK_CLAIMED);
+            taskClaimed = savedTaskClaimed === 'true' ? true : false;
+        }
+
+        // ---------- SAVE DATA TO LOCALSTORAGE ----------
+        function saveData() {
+            localStorage.setItem(STORAGE_KEYS.BALANCE, balance.toString());
+            localStorage.setItem(STORAGE_KEYS.REFERRALS, totalReferrals.toString());
+            localStorage.setItem(STORAGE_KEYS.TASK_CLAIMED, taskClaimed.toString());
+        }
+
         // ---------- STATE ----------
-        let balance = 8.42;        // USDT
-        let totalReferrals = 1;     // start from 1
-        let taskClaimed = false;    // task only once
+        let balance = 0.00;           // লোকাল স্টোরেজ থেকে লোড হবে
+        let totalReferrals = 1;        // লোকাল স্টোরেজ থেকে লোড হবে
+        let taskClaimed = false;       // লোকাল স্টোরেজ থেকে লোড হবে
+
+        // লোকাল স্টোরেজ থেকে ডাটা লোড করি
+        loadSavedData();
 
         // DOM elements
         const balanceSpan = document.getElementById('balanceDisplay');
@@ -561,6 +615,7 @@
         const verifyBtn = document.getElementById('verifyTaskBtn');
         const copyBtn = document.getElementById('copyReferBtn');
         const methodSpans = document.querySelectorAll('.method');
+        const joinChannelBtn = document.getElementById('joinChannelBtn');
 
         // ---------- TAB SWITCHING ----------
         const tabs = document.querySelectorAll('.tab-btn');
@@ -595,29 +650,37 @@
             const usdtVal = parseFloat(usdtInput.value) || 0;
             const bdt = usdtVal * 125;
             bdtPreview.innerText = bdt.toFixed(0);
+
+            // টাস্ক বাটনের স্টেট আপডেট
+            if (taskClaimed) {
+                verifyBtn.disabled = true;
+                verifyBtn.innerText = '✓ ALREADY CLAIMED';
+            } else {
+                verifyBtn.disabled = false;
+                verifyBtn.innerText = '✅ VERIFY & EARN';
+            }
+
+            // ডাটা সেভ করি যখন UI আপডেট হয়
+            saveData();
         }
 
         // ---------- WATCH AD (with GigaPub ID 5793) ----------
-        // Ensure showGiga is available (from SDK)
         window.showGiga = window.showGiga || function() {
             return new Promise((resolve, reject) => {
-                // fallback if SDK not loaded (but we have project id 5793, so it should load)
                 if (typeof window.AdGigaFallback !== 'undefined' && window.AdGigaFallback) {
                     return window.AdGigaFallback().then(resolve).catch(reject);
                 }
                 console.warn('GigaPub SDK still loading, using fallback simulation');
-                setTimeout(resolve, 800); // pretend ad watched after loading
+                setTimeout(resolve, 800);
             });
         };
 
         watchBtn.addEventListener('click', () => {
-            // disable button temporarily to avoid double click
             watchBtn.disabled = true;
             watchBtn.innerText = '⏳ LOADING AD...';
             window.showGiga()
                 .then(() => {
-                    // reward
-                    balance += 0.02;
+                    balance += 0.02;           // প্রতি এডে ০.০২ করে বাড়বে
                     if (balance > 999) balance = 999;
                     refreshUI();
                     alert('🎬 +0.02 USDT earned! (Ad watched successfully)');
@@ -637,12 +700,11 @@
                 alert('⚠️ You have already claimed this task reward.');
                 return;
             }
-            // simulate join verification
-            balance += 0.20;
-            refreshUI();
+            // In real app, you might want to check if user actually joined via Telegram API
+            // Here we simply reward after they click (assuming they joined)
+            balance += 0.20;                   // টাস্ক কমপ্লিট করলে ০.২০ যোগ হবে
             taskClaimed = true;
-            verifyBtn.disabled = true;
-            verifyBtn.innerText = '✓ ALREADY CLAIMED';
+            refreshUI();  // refreshUI() automatically saves data
             alert('🎉 Task completed! +0.20 USDT');
         });
 
@@ -653,7 +715,6 @@
                 m.classList.add('active-method');
             });
         });
-        // default active first
         if (methodSpans.length) methodSpans[0].classList.add('active-method');
 
         // ---------- COPY LINK ----------
@@ -683,7 +744,7 @@
             }
 
             balance -= usdtAmount;
-            refreshUI();
+            refreshUI();  // refreshUI() automatically saves data
             alert(`✅ Withdrawal request for ${usdtAmount} USDT (${(usdtAmount*125).toFixed(0)} BDT) submitted! (demo)`);
         });
 
@@ -691,7 +752,7 @@
         document.getElementById('referPanel').addEventListener('dblclick', () => {
             totalReferrals += 1;
             if (totalReferrals > 10) totalReferrals = 10;
-            refreshUI();
+            refreshUI();  // refreshUI() automatically saves data
             alert(`➕ Referral count increased to ${totalReferrals} (double-click demo)`);
         });
 
@@ -700,6 +761,9 @@
 
         // initial refresh
         refreshUI();
+
+        // প্রতি ৫ সেকেন্ডে ডাটা সেভ করার ব্যাকআপ (নিশ্চিত থাকার জন্য)
+        setInterval(saveData, 5000);
     })();
 </script>
 
