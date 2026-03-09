@@ -2,443 +2,221 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>X MONEY IO · cartoon earn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X MONEY IO · Mobile</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Comic Neue', 'Segoe UI', 'Fredoka', system-ui, sans-serif;
+            font-family: 'Comic Neue', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background: linear-gradient(145deg, #f9e57c 0%, #ffb347 100%);
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
-            margin: 0;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* cartoon clouds and blobs */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 280px;
-            height: 280px;
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 70% 30% 60% 40% / 50% 60% 40% 50%;
-            top: 10px;
-            left: -50px;
-            z-index: 0;
-            box-shadow: 0 0 0 15px rgba(255,250,210,0.2);
-        }
-        body::after {
-            content: '';
-            position: absolute;
-            width: 350px;
-            height: 350px;
-            background: rgba(255, 255, 180, 0.3);
-            border-radius: 40% 60% 30% 70% / 60% 30% 70% 40%;
-            bottom: -70px;
-            right: -70px;
-            z-index: 0;
+            overflow: hidden;
         }
 
         .phone-container {
-            max-width: 400px;
             width: 100%;
+            max-width: 400px;
+            height: 98vh;
             background-color: #fff9e6;
-            border-radius: 40px 40px 30px 30px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.25), 0 0 0 6px #ffdd99, 0 0 0 10px #ffeecc;
-            padding: 18px 14px 20px 14px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
             position: relative;
             z-index: 10;
-            border: 3px solid #ffb554;
-            backdrop-filter: blur(2px);
+            border: 4px solid #ffb554;
+            margin: 5px;
         }
 
-        /* cute notch */
         .notch {
-            width: 130px;
-            height: 26px;
+            width: 100px;
+            height: 20px;
             background: #ffe0a3;
-            border-radius: 40px;
-            margin: -30px auto 16px auto;
-            border: 3px solid #f5a623;
-            box-shadow: inset 0 -2px 5px rgba(255,255,200,0.8);
+            border-radius: 0 0 15px 15px;
+            margin: 0 auto 10px auto;
+            border: 2px solid #f5a623;
+            border-top: none;
         }
 
-        /* top bar with unique id */
+        /* Top Bar Updated */
         .unique-bar {
             background: #c1e6f5;
-            border-radius: 40px;
-            padding: 10px 14px;
+            margin: 0 10px 10px;
+            border-radius: 15px;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border: 3px solid #1f8bb7;
-            box-shadow: 0 5px 0 #0f5b7a, 0 6px 10px rgba(0,0,0,0.15);
-            margin-bottom: 16px;
-            color: #1e3d4a;
+            border: 2px solid #1f8bb7;
             font-weight: 700;
-            font-size: 0.9rem;
-            background-image: repeating-linear-gradient(45deg, #daf0ff 0px, #daf0ff 8px, #b1e0f0 8px, #b1e0f0 16px);
+            font-size: 0.8rem;
+            box-shadow: 0 4px 0 #1f8bb7;
         }
 
-        .unique-id {
-            background: white;
-            padding: 4px 14px;
-            border-radius: 40px;
-            border: 2px solid #fd9700;
-            font-family: monospace;
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #2c3e50;
-            box-shadow: inset 0 -2px 0 #c0c0c0;
-            font-size: 0.9rem;
+        .balance-highlight {
+            background: #ffea00; /* Bright Yellow */
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: 2px solid #ff9f1c;
+            color: #000;
+            font-size: 1.1rem; /* Bigger size */
+            font-weight: 900;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
         }
 
-        /* main content panels (scrollable area) */
         .panel-container {
-            max-height: 460px;
+            flex: 1;
             overflow-y: auto;
-            border-radius: 30px;
-            margin-bottom: 12px;
-            padding-right: 4px;
-            scrollbar-width: thin;
-            scrollbar-color: #ffb554 #ffeaa6;
-        }
-        .panel-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .panel-container::-webkit-scrollbar-track {
-            background: #ffeaa6;
-            border-radius: 20px;
-        }
-        .panel-container::-webkit-scrollbar-thumb {
-            background: #ff9f1c;
-            border-radius: 20px;
-            border: 1px solid #b36b00;
+            padding: 0 10px;
         }
 
-        /* content panels */
         .panel {
             display: none;
-            background: rgba(255, 251, 235, 0.8);
-            border-radius: 40px 40px 30px 30px;
-            border: 4px solid #ffb554;
-            padding: 18px 14px;
-            backdrop-filter: blur(3px);
-            box-shadow: inset 0 -3px 0 #ed9e2d, 0 10px 15px rgba(255,140,0,0.2);
-            margin-bottom: 6px;
+            padding-bottom: 20px;
         }
 
         .panel.active-panel {
             display: block;
+            animation: fadeIn 0.3s;
         }
 
-        /* coin style */
-        .coin-icon {
-            background: radial-gradient(circle at 30% 30%, #fff1a0, #f7b731);
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            border: 3px solid #fff2b5;
-            box-shadow: 0 4px 0 #b37100;
-            margin-right: 6px;
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
         }
 
         .home-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
             background: #fdeec9;
-            border-radius: 40px;
-            padding: 16px;
-            border: 3px solid #f3981c;
-        }
-
-        .stat-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1rem;
-            font-weight: 700;
+            border-radius: 20px;
+            padding: 15px;
+            border: 2px solid #f3981c;
+            margin-bottom: 15px;
         }
 
         .btn-earn {
             background: #6ec96e;
-            border: none;
-            border-radius: 60px;
-            padding: 14px 16px;
+            border-radius: 20px;
+            padding: 15px;
             font-weight: 800;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: #003300;
-            border: 4px solid #fdffb3;
-            box-shadow: 0 6px 0 #2d6e2d, 0 8px 16px #98fb98;
+            border: 3px solid #fdffb3;
+            box-shadow: 0 4px 0 #2d6e2d;
             width: 100%;
             cursor: pointer;
-            transition: 0.05s linear;
         }
 
         .btn-earn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #2d6e2d, 0 5px 12px yellowgreen;
-        }
-
-        .refer-link-box {
-            background: #d5e6f5;
-            border: 3px dashed #fd7e14;
-            border-radius: 30px;
-            padding: 12px;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.85rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .copy-btn {
-            background: #ff9f1c;
-            border: none;
-            border-radius: 40px;
-            padding: 8px 16px;
-            font-weight: 800;
-            color: #2c1a00;
-            border: 2px solid white;
-            box-shadow: 0 3px 0 #b16d0e;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.05s;
-            white-space: nowrap;
-        }
-        .copy-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #b16d0e;
-        }
-
-        .task-item {
-            background: #cfe9dc;
-            border-radius: 40px;
-            padding: 14px;
-            border: 3px solid #2e9c77;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 5px 0 #1d6b4f;
-        }
-
-        .task-amount {
-            background: #ffd966;
-            border-radius: 30px;
-            padding: 8px 14px;
-            font-weight: 800;
-            color: #3d2600;
-            font-size: 0.9rem;
-        }
-        .join-btn {
-            background: #2e9c77;
-            border: none;
-            border-radius: 40px;
-            padding: 10px 18px;
-            font-weight: 800;
-            color: white;
-            border: 3px solid #f9e57c;
-            box-shadow: 0 4px 0 #1b5e46;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.05s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .join-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 #1b5e46;
-        }
-
-        .btn-verify {
-            background: #ffb703;
-            border: none;
-            border-radius: 40px;
-            padding: 10px 20px;
-            font-weight: 800;
-            box-shadow: 0 4px 0 #b16d0e;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .btn-verify:disabled {
-            opacity: 0.5;
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #b16d0e;
-            pointer-events: none;
+            box-shadow: 0 2px 0 #2d6e2d;
         }
 
+        /* Withdraw Method Highlights Updated */
         .withdraw-methods {
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin: 12px 0;
+            gap: 8px;
+            margin: 15px 0;
         }
 
         .method {
-            background: #ffdbb5;
-            border-radius: 30px;
-            padding: 8px 14px;
-            border: 2px solid #fc9f2b;
-            font-weight: 700;
-            box-shadow: 0 3px 0 #bb7a25;
-            font-size: 0.9rem;
+            flex: 1;
+            text-align: center;
+            background: #fff;
+            padding: 12px 5px;
+            border-radius: 15px;
+            border: 2px solid #ccc;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
             cursor: pointer;
-            transition: 0.1s;
-        }
-        .method.active-method {
-            background: #f9b84a;
-            border: 4px solid #b64516;
-            font-weight: 900;
-            transform: scale(1.02);
-            box-shadow: 0 5px 0 #9b4a1a;
-            color: #2d1500;
+            color: #555;
         }
 
-        .calc-box {
-            background: #ebd5b3;
-            border-radius: 30px;
-            padding: 14px;
-            margin: 12px 0;
-            border: 3px solid #a96f1f;
+        .method.active-method {
+            background: #ff9f1c;
+            border-color: #b64516;
+            color: #fff;
+            font-weight: 900; /* Bold when selected */
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(182, 69, 22, 0.3);
         }
 
         .withdraw-rules {
             background: #ffe0d9;
-            border-radius: 25px;
-            padding: 14px;
-            border: 4px solid #ff4d4d;
-            box-shadow: 0 4px 0 #b30000;
+            border-radius: 15px;
+            padding: 10px;
+            border: 2px solid #ff4d4d;
+            margin-top: 10px;
         }
 
         .red-highlight {
             color: #c40000;
-            font-weight: 900;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            background: #ffffb0;
-            padding: 4px 10px;
-            border-radius: 40px;
-            display: inline-block;
-            border: 2px solid red;
-            text-shadow: none;
-        }
-
-        .footer-currency {
-            background: #f9cf8b;
-            border-radius: 30px;
-            padding: 8px;
             font-weight: bold;
-            text-align: center;
-            border: 3px solid #b2711b;
-            font-size: 0.9rem;
-            margin-top: 8px;
+            font-size: 0.85rem;
         }
 
-        input {
-            background: white;
-            border: 4px solid #ff9f1c;
-            border-radius: 50px;
-            padding: 10px 16px;
-            font-size: 1rem;
-            width: 100%;
-            margin: 5px 0;
-            font-weight: bold;
-            outline: none;
-        }
-
-        .bdt-preview {
-            font-size: 1.8rem;
-            background: #fffbbc;
-            border-radius: 40px;
-            padding: 6px 16px;
-            border: 3px solid green;
-            text-align: center;
-        }
-
-        /* bottom navigation tabs */
         .tab-bar {
             display: flex;
-            gap: 6px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
             background: #ffddbb;
-            padding: 8px 6px;
-            border-radius: 60px;
-            border: 3px solid #fea82f;
-            box-shadow: 0 5px 0 #bb7a25;
+            padding: 10px 5px;
+            border-radius: 25px 25px 0 0;
+            border-top: 3px solid #fea82f;
         }
 
         .tab-btn {
-            background: #fee6a9;
-            border: 3px solid #ff9f1c;
-            border-radius: 40px;
-            padding: 8px 12px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            color: #7b3f00;
-            box-shadow: 0 4px 0 #bb7a25, 0 4px 8px #ffd966;
-            cursor: pointer;
-            transition: 0.07s ease;
-            text-shadow: 1px 1px 0 #ffeeaa;
-            flex: 1 1 0px;
-            min-width: 70px;
+            flex: 1;
             text-align: center;
+            padding: 8px 0;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #7b3f00;
+            background: #fee6a9;
+            margin: 0 2px;
+            border-radius: 12px;
+            border: 2px solid #ff9f1c;
         }
 
         .tab-btn.active {
             background: #ffbe5c;
-            box-shadow: 0 2px 0 #bb7a25, 0 6px 10px #ffb347;
-            transform: translateY(2px);
+            transform: translateY(-2px);
         }
-        .balance-show {
-            background: #f6d365;
-            border-radius: 30px;
-            padding: 8px 14px;
-            margin-bottom: 12px;
-            font-weight: 900;
-            font-size: 1.2rem;
-            border: 3px solid #a75800;
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 15px;
+            border: 2px solid #ff9f1c;
+            margin-top: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .footer-currency {
+            font-size: 0.7rem;
             text-align: center;
+            padding: 5px;
+            background: #f9cf8b;
         }
     </style>
-    <!-- comic-neue font -->
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;800&display=swap" rel="stylesheet">
-    <!-- GigaPub Ad SDK with PROJECT ID 5793 (provided by user) -->
+    
     <script data-project-id="5793" id="gigapub-sdk">
         !function(){
             var s=document.currentScript,p=s.getAttribute('data-project-id')||'default';
             var d=['https://ad.gigapub.tech','https://ru-ad.gigapub.tech'],i=0,t,sc;
             function l(){
-                sc=document.createElement('script');
-                sc.async=true;
-                sc.src=d[i]+'/script?id='+p;
+                sc=document.createElement('script');sc.async=true;sc.src=d[i]+'/script?id='+p;
                 clearTimeout(t);
-                t=setTimeout(function(){
-                    sc.onload=sc.onerror=null;
-                    sc.src='';
-                    if(++i<d.length)l();
-                },15000);
-                sc.onload=function(){clearTimeout(t)};
-                sc.onerror=function(){clearTimeout(t);if(++i<d.length)l()};
+                t=setTimeout(function(){if(++i<d.length)l();},10000);
                 document.head.appendChild(sc);
             }
             l();
@@ -446,329 +224,197 @@
     </script>
 </head>
 <body>
+
 <div class="phone-container">
     <div class="notch"></div>
 
-    <!-- unique id bar -->
     <div class="unique-bar">
-        <span>🆔 YOUR ID</span>
-        <span class="unique-id" id="uniqueIdDisplay">X7K92M</span>
+        <span>🆔 ID: <span id="uniqueIdDisplay">X7K92M</span></span>
+        <div>
+            <small style="display:block; font-size: 0.6rem; text-align: right; margin-bottom: 2px;">BALANCE:</small>
+            <div class="balance-highlight" id="balanceDisplay">0.00 USDT</div>
+        </div>
     </div>
 
-    <!-- scrollable panel container (content area) -->
     <div class="panel-container">
-        <!-- HOME PANEL -->
         <div id="homePanel" class="panel active-panel">
-            <div style="text-align: center; margin-bottom: 12px;">
-                <span class="coin-icon">💰</span>
-                <span style="font-size: 1.8rem; font-weight: 900;">X MONEY IO</span>
+            <h2 style="text-align:center; margin-bottom:10px;">💰 X MONEY IO</h2>
+            <div class="home-stats">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">🪙 0.02 USDT Per Ad</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">👀 Daily Limit: 500 Ads</div>
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: bold;">🎯 Status: Ready to Earn</div>
+            </div>
+            <button class="btn-earn" id="watchAdBtn">▶ WATCH AD (+0.02)</button>
+        </div>
+
+        <div id="referPanel" class="panel">
+            <h3>👥 Invite Friends</h3>
+            <div style="background:#d5e6f5; padding:10px; border-radius:15px; margin:10px 0; word-break:break-all; font-size:0.8rem;">
+                <span id="referLinkText">http://t.me/X_MONEYIO_BOT?start=X7K92M</span>
+            </div>
+            <button class="method" id="copyReferBtn" style="width:100%; padding:10px; border-color:#ff9f1c; color:#7b3f00;">📋 Copy Link</button>
+            <div class="home-stats" style="margin-top:15px;">
+                <p>Total Referrals: <strong id="referralCount">1</strong></p>
+            </div>
+        </div>
+
+        <div id="taskPanel" class="panel">
+            <h3>📢 Official Task</h3>
+            <div class="home-stats">
+                <p>Join Telegram Channel</p>
+                <a href="https://t.me/PUFI83" target="_blank" style="display:block; background:#2e9c77; color:white; text-align:center; padding:10px; border-radius:15px; text-decoration:none; margin:10px 0; font-weight:bold;">JOIN @PUFI83</a>
+                <button class="btn-earn" id="verifyTaskBtn" style="font-size:0.9rem; padding:10px;">✅ VERIFY (+0.20)</button>
+            </div>
+        </div>
+
+        <div id="withdrawPanel" class="panel">
+            <h3>💸 Withdraw</h3>
+            <div class="withdraw-methods" id="methodGroup">
+                <div class="method active-method" onclick="selectMethod(this)">Nagad</div>
+                <div class="method" onclick="selectMethod(this)">bKash</div>
+                <div class="method" onclick="selectMethod(this)">TON</div>
             </div>
             <div class="home-stats">
-                <div class="stat-row"><span class="coin-icon">🪙</span> <span>Earn 0.02 USDT / ad</span></div>
-                <div class="stat-row"><span>👀</span> <span>Watch up to <strong>500 ads/day</strong></span></div>
-                <div class="stat-row"><span>💼</span> <span>Your balance: <strong id="balanceDisplay">0.00 USDT</strong></span></div>
-                <div class="stat-row"><span>🔑</span> <span>Unique ID: <strong id="uniqueIdInHome">X7K92M</strong></span></div>
+                <label>Enter USDT (1 USDT = 125 BDT)</label>
+                <input type="number" id="usdtInput" value="10">
+                <p style="margin-top:10px;">Receive: <strong id="bdtPreview" style="color: #2e9c77; font-size: 1.2rem;">1250</strong> BDT</p>
             </div>
-            <button class="btn-earn" id="watchAdBtn">▶ WATCH AD +0.02</button>
-            <div style="margin-top: 14px; font-size: 0.95rem; background: #b1e0f0; border-radius: 30px; padding: 8px; border:2px solid #0077b6; text-align: center;">🎉 start earning instantly!</div>
-        </div>
-
-        <!-- REFERRAL PANEL -->
-        <div id="referPanel" class="panel">
-            <h2 style="display: flex; gap: 6px; font-size: 1.5rem;">👥 Referral Program <span class="coin-icon">🎁</span></h2>
-            <div class="refer-link-box" id="referLinkDisplay">
-                <span id="referLinkText">http://t.me/X_MONEYIO_BOT?start=X7K92M</span>
-                <button class="copy-btn" id="copyReferBtn">📋 COPY</button>
-            </div>
-            <p style="margin: 10px 0;">👤 Your Unique ID: <strong id="uniqueIdRefer">X7K92M</strong></p>
-            <div style="background: #a8e6cf; border-radius: 40px; padding: 14px; border: 3px solid #3b9e7a;">
-                <p>🎁 Invite friends & earn!</p>
-                <p>📈 Total referrals: <strong id="referralCount">1</strong> </p>
-                <p>🔗 Share your link – unlimited rewards</p>
-            </div>
-        </div>
-
-        <!-- TASK PANEL (with join button) -->
-        <div id="taskPanel" class="panel">
-            <h2 style="font-size: 1.6rem;">📌 Complete Task</h2>
-            <div class="task-item" style="flex-direction: column; align-items: stretch;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="coin-icon">📢</span>
-                    <div style="flex:1; font-size: 0.9rem;"><strong>Join official channel</strong><br>@PUFI83</div>
-                    <span class="task-amount">+0.20 USDT</span>
-                </div>
-                <a href="https://t.me/PUFI83" target="_blank" id="joinChannelBtn" class="join-btn" style="text-align: center; width: 100%;">🔔 JOIN CHANNEL</a>
-            </div>
-            <button class="btn-verify" id="verifyTaskBtn" style="margin: 18px 0 6px; width: 100%;">✅ VERIFY & EARN</button>
-            <p style="color: #3c5a2b; font-size: 0.9rem;">1. Join channel 2. Click verify (one time reward)</p>
-        </div>
-
-        <!-- WITHDRAW PANEL -->
-        <div id="withdrawPanel" class="panel">
-            <h2 style="font-size: 1.6rem;">💸 Withdraw</h2>
-            <!-- total balance show inside withdraw -->
-            <div class="balance-show" id="withdrawBalanceShow">💰 Total Balance: 0.00 USDT</div>
-            <div class="withdraw-methods" id="methodContainer">
-                <span class="method" data-method="nagad">🟢 Nagad</span>
-                <span class="method" data-method="bkash">🟣 bKash</span>
-                <span class="method" data-method="ton">🔵 TON</span>
-            </div>
-            <div class="calc-box">
-                <p><strong>💲 1 USDT = 125 BDT</strong></p>
-                <label>Enter USDT amount</label>
-                <input type="number" id="usdtInput" placeholder="e.g. 10" min="0" step="0.1" value="12">
-                <div style="display: flex; justify-content: space-between; margin: 10px 4px;">
-                    <span>💵 BDT value:</span>
-                    <span class="bdt-preview" id="bdtPreview">1500</span>
-                </div>
-            </div>
-
-            <!-- STRICT WITHDRAW RULES (RED HIGHLIGHT) -->
             <div class="withdraw-rules">
-                <span class="red-highlight">🔴 MINIMUM: 10 USDT</span><br>
-                <span class="red-highlight" style="margin-top: 6px;">🔴 MUST REFER 5 USERS</span>
-                <p style="font-weight: bold; color: #a10000;">(current referrals: <span id="referCountForWithdraw">1</span> / 5 )</p>
+                <p class="red-highlight">🔴 Min Withdraw: 10 USDT</p>
+                <p class="red-highlight">🔴 Need 5 Referrals (Current: <span id="refNeed">1</span>)</p>
             </div>
-
-            <button id="withdrawBtn" style="background: #fd8b78; width:100%; padding:16px; border-radius:50px; border:4px solid #fff; font-weight:800; margin-top:14px; box-shadow:0 5px 0 #b33000;">REQUEST WITHDRAW</button>
-            <p style="text-align: center; margin-top: 6px; font-size:0.9rem;">Min 5 refs & 10 USDT</p>
+            <button id="withdrawBtn" class="btn-earn" style="margin-top:10px; background:#fd8b78;">REQUEST WITHDRAW</button>
         </div>
-    </div> <!-- end panel-container -->
+    </div>
 
-    <!-- bottom navigation tabs (moved to bottom) -->
     <div class="tab-bar">
-        <div class="tab-btn active" data-tab="home">🏠 HOME</div>
-        <div class="tab-btn" data-tab="refer">👥 REFER</div>
-        <div class="tab-btn" data-tab="task">📢 TASK</div>
-        <div class="tab-btn" data-tab="withdraw">💸 WITHDRAW</div>
+        <div class="tab-btn active" data-tab="home">HOME</div>
+        <div class="tab-btn" data-tab="refer">REFER</div>
+        <div class="tab-btn" data-tab="task">TASK</div>
+        <div class="tab-btn" data-tab="withdraw">CASH</div>
     </div>
-
-    <!-- cute footer -->
-    <div class="footer-currency">
-        ⚡ Cartoon earn · every click counts ⚡
-    </div>
+    
+    <div class="footer-currency">⚡ Cartoon earn · every click counts ⚡</div>
 </div>
 
 <script>
+    // Withdraw Selection Function
+    function selectMethod(el) {
+        const methods = document.querySelectorAll('.method');
+        methods.forEach(m => m.classList.remove('active-method'));
+        el.classList.add('active-method');
+    }
+
     (function() {
-        // ---------- UNIQUE ID ----------
-        const userId = 'X7K92M'; 
-        const uniqueElements = {
-            uniqueIdDisplay: document.getElementById('uniqueIdDisplay'),
-            uniqueIdInHome: document.getElementById('uniqueIdInHome'),
-            uniqueIdRefer: document.getElementById('uniqueIdRefer'),
-            referLinkText: document.getElementById('referLinkText'),
-        };
-        for (let key in uniqueElements) {
-            if (uniqueElements[key]) {
-                if (key === 'referLinkText') uniqueElements[key].innerText = `http://t.me/X_MONEYIO_BOT?start=${userId}`;
-                else uniqueElements[key].innerText = userId;
+        let balance = parseFloat(localStorage.getItem('x_bal')) || 0;
+        let referrals = parseInt(localStorage.getItem('x_ref')) || 1;
+        let taskDone = localStorage.getItem('x_task') === 'true';
+        const userId = 'X7K92M';
+
+        function updateUI() {
+            document.getElementById('balanceDisplay').innerText = balance.toFixed(2) + ' USDT';
+            document.getElementById('referralCount').innerText = referrals;
+            document.getElementById('refNeed').innerText = referrals;
+            document.getElementById('uniqueIdDisplay').innerText = userId;
+            
+            const bdt = (parseFloat(document.getElementById('usdtInput').value) || 0) * 125;
+            document.getElementById('bdtPreview').innerText = bdt.toFixed(0);
+
+            if(taskDone) {
+                const vt = document.getElementById('verifyTaskBtn');
+                vt.disabled = true;
+                vt.innerText = 'CLAIMED';
+                vt.style.background = '#ccc';
+                vt.style.boxShadow = 'none';
             }
+
+            localStorage.setItem('x_bal', balance);
+            localStorage.setItem('x_ref', referrals);
+            localStorage.setItem('x_task', taskDone);
         }
 
-        // ---------- LOCAL STORAGE KEYS ----------
-        const STORAGE_KEYS = {
-            BALANCE: 'xmoney_balance',
-            REFERRALS: 'xmoney_referrals',
-            TASK_CLAIMED: 'xmoney_task_claimed'
-        };
-
-        // ---------- LOAD SAVED DATA FROM LOCALSTORAGE ----------
-        function loadSavedData() {
-            // ব্যালেন্স লোড (নতুন ইউজার হলে ০)
-            const savedBalance = localStorage.getItem(STORAGE_KEYS.BALANCE);
-            balance = savedBalance ? parseFloat(savedBalance) : 0.00;
-            
-            // রেফারেল কাউন্ট লোড (নতুন ইউজার হলে ১ - ডেমো)
-            const savedReferrals = localStorage.getItem(STORAGE_KEYS.REFERRALS);
-            totalReferrals = savedReferrals ? parseInt(savedReferrals) : 1;
-            
-            // টাস্ক ক্লেইম স্ট্যাটাস লোড
-            const savedTaskClaimed = localStorage.getItem(STORAGE_KEYS.TASK_CLAIMED);
-            taskClaimed = savedTaskClaimed === 'true' ? true : false;
-        }
-
-        // ---------- SAVE DATA TO LOCALSTORAGE ----------
-        function saveData() {
-            localStorage.setItem(STORAGE_KEYS.BALANCE, balance.toString());
-            localStorage.setItem(STORAGE_KEYS.REFERRALS, totalReferrals.toString());
-            localStorage.setItem(STORAGE_KEYS.TASK_CLAIMED, taskClaimed.toString());
-        }
-
-        // ---------- STATE ----------
-        let balance = 0.00;           // লোকাল স্টোরেজ থেকে লোড হবে
-        let totalReferrals = 1;        // লোকাল স্টোরেজ থেকে লোড হবে
-        let taskClaimed = false;       // লোকাল স্টোরেজ থেকে লোড হবে
-
-        // লোকাল স্টোরেজ থেকে ডাটা লোড করি
-        loadSavedData();
-
-        // DOM elements
-        const balanceSpan = document.getElementById('balanceDisplay');
-        const withdrawBalanceShow = document.getElementById('withdrawBalanceShow');
-        const referralCountSpan = document.getElementById('referralCount');
-        const referCountWithdraw = document.getElementById('referCountForWithdraw');
-        const usdtInput = document.getElementById('usdtInput');
-        const bdtPreview = document.getElementById('bdtPreview');
-        const withdrawBtn = document.getElementById('withdrawBtn');
+        // Ad Logic
         const watchBtn = document.getElementById('watchAdBtn');
-        const verifyBtn = document.getElementById('verifyTaskBtn');
-        const copyBtn = document.getElementById('copyReferBtn');
-        const methodSpans = document.querySelectorAll('.method');
-        const joinChannelBtn = document.getElementById('joinChannelBtn');
-
-        // ---------- TAB SWITCHING ----------
-        const tabs = document.querySelectorAll('.tab-btn');
-        const panels = {
-            home: document.getElementById('homePanel'),
-            refer: document.getElementById('referPanel'),
-            task: document.getElementById('taskPanel'),
-            withdraw: document.getElementById('withdrawPanel')
-        };
-
-        function activateTab(tabId) {
-            tabs.forEach(t => t.classList.remove('active'));
-            Object.values(panels).forEach(p => p.classList.remove('active-panel'));
-            const activeTab = Array.from(tabs).find(t => t.dataset.tab === tabId);
-            if (activeTab) activeTab.classList.add('active');
-            if (panels[tabId]) panels[tabId].classList.add('active-panel');
-        }
-        tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabId = tab.dataset.tab;
-                if (tabId) activateTab(tabId);
-            });
-        });
-
-        // ---------- REFRESH UI ----------
-        function refreshUI() {
-            balanceSpan.innerText = balance.toFixed(2) + ' USDT';
-            withdrawBalanceShow.innerText = `💰 Total Balance: ${balance.toFixed(2)} USDT`;
-            referralCountSpan.innerText = totalReferrals;
-            referCountWithdraw.innerText = totalReferrals;
-
-            const usdtVal = parseFloat(usdtInput.value) || 0;
-            const bdt = usdtVal * 125;
-            bdtPreview.innerText = bdt.toFixed(0);
-
-            // টাস্ক বাটনের স্টেট আপডেট
-            if (taskClaimed) {
-                verifyBtn.disabled = true;
-                verifyBtn.innerText = '✓ ALREADY CLAIMED';
-            } else {
-                verifyBtn.disabled = false;
-                verifyBtn.innerText = '✅ VERIFY & EARN';
-            }
-
-            // ডাটা সেভ করি যখন UI আপডেট হয়
-            saveData();
-        }
-
-        // ---------- WATCH AD (with GigaPub ID 5793) ----------
-        window.showGiga = window.showGiga || function() {
-            return new Promise((resolve, reject) => {
-                if (typeof window.AdGigaFallback !== 'undefined' && window.AdGigaFallback) {
-                    return window.AdGigaFallback().then(resolve).catch(reject);
-                }
-                console.warn('GigaPub SDK still loading, using fallback simulation');
-                setTimeout(resolve, 800);
-            });
-        };
-
         watchBtn.addEventListener('click', () => {
             watchBtn.disabled = true;
-            watchBtn.innerText = '⏳ LOADING AD...';
-            window.showGiga()
-                .then(() => {
-                    balance += 0.02;           // প্রতি এডে ০.০২ করে বাড়বে
-                    if (balance > 999) balance = 999;
-                    refreshUI();
-                    alert('🎬 +0.02 USDT earned! (Ad watched successfully)');
-                })
-                .catch(e => {
-                    alert('⚠️ Ad failed to load, try again. (Error: ' + (e.message || 'unknown') + ')');
-                })
-                .finally(() => {
+            watchBtn.innerText = '⏳ LOADING...';
+
+            const safetyTimeout = setTimeout(() => {
+                if(watchBtn.disabled && watchBtn.innerText === '⏳ LOADING...') {
                     watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ WATCH AD +0.02';
+                    watchBtn.innerText = '▶ WATCH AD (+0.02)';
+                    alert('Connection slow. Please try again.');
+                }
+            }, 10000);
+
+            if (typeof window.showGiga === 'function') {
+                window.showGiga().then(() => {
+                    clearTimeout(safetyTimeout);
+                    balance += 0.02;
+                    updateUI();
+                    alert('🎬 Success! 0.02 USDT added.');
+                }).catch(() => {
+                    clearTimeout(safetyTimeout);
+                    alert('Ad failed. Try again.');
+                }).finally(() => {
+                    watchBtn.disabled = false;
+                    watchBtn.innerText = '▶ WATCH AD (+0.02)';
                 });
-        });
-
-        // ---------- VERIFY TASK (only once) ----------
-        verifyBtn.addEventListener('click', () => {
-            if (taskClaimed) {
-                alert('⚠️ You have already claimed this task reward.');
-                return;
+            } else {
+                setTimeout(() => {
+                    clearTimeout(safetyTimeout);
+                    balance += 0.02;
+                    updateUI();
+                    watchBtn.disabled = false;
+                    watchBtn.innerText = '▶ WATCH AD (+0.02)';
+                    alert('🎬 Ad Finished!');
+                }, 2000);
             }
-            // In real app, you might want to check if user actually joined via Telegram API
-            // Here we simply reward after they click (assuming they joined)
-            balance += 0.20;                   // টাস্ক কমপ্লিট করলে ০.২০ যোগ হবে
-            taskClaimed = true;
-            refreshUI();  // refreshUI() automatically saves data
-            alert('🎉 Task completed! +0.20 USDT');
         });
 
-        // ---------- WITHDRAW METHOD SELECT (bold) ----------
-        methodSpans.forEach(m => {
-            m.addEventListener('click', (e) => {
-                methodSpans.forEach(el => el.classList.remove('active-method'));
-                m.classList.add('active-method');
-            });
-        });
-        if (methodSpans.length) methodSpans[0].classList.add('active-method');
-
-        // ---------- COPY LINK ----------
-        copyBtn.addEventListener('click', () => {
-            const link = document.getElementById('referLinkText').innerText;
-            navigator.clipboard.writeText(link).then(() => {
-                alert('✅ Referral link copied!');
-            }).catch(() => {
-                prompt('Manual copy:', link);
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab + 'Panel').classList.add('active-panel');
             });
         });
 
-        // ---------- WITHDRAW ACTION ----------
-        withdrawBtn.addEventListener('click', () => {
-            const usdtAmount = parseFloat(usdtInput.value) || 0;
-            if (usdtAmount < 10) {
-                alert('❌ Minimum withdraw is 10 USDT!');
-                return;
+        // Task
+        document.getElementById('verifyTaskBtn').addEventListener('click', () => {
+            if(!taskDone) {
+                balance += 0.20;
+                taskDone = true;
+                updateUI();
+                alert('Task Complete! +0.20 USDT');
             }
-            if (totalReferrals < 5) {
-                alert(`❌ You need at least 5 referrals. Current: ${totalReferrals}`);
-                return;
-            }
-            if (usdtAmount > balance) {
-                alert(`❌ Insufficient balance. You have ${balance.toFixed(2)} USDT`);
-                return;
-            }
-
-            balance -= usdtAmount;
-            refreshUI();  // refreshUI() automatically saves data
-            alert(`✅ Withdrawal request for ${usdtAmount} USDT (${(usdtAmount*125).toFixed(0)} BDT) submitted! (demo)`);
         });
 
-        // ---------- REFERRAL INCREASE (double click on refer panel for demo) ----------
-        document.getElementById('referPanel').addEventListener('dblclick', () => {
-            totalReferrals += 1;
-            if (totalReferrals > 10) totalReferrals = 10;
-            refreshUI();  // refreshUI() automatically saves data
-            alert(`➕ Referral count increased to ${totalReferrals} (double-click demo)`);
+        // Withdraw
+        document.getElementById('withdrawBtn').addEventListener('click', () => {
+            const amt = parseFloat(document.getElementById('usdtInput').value);
+            const selectedMethod = document.querySelector('.method.active-method').innerText;
+            
+            if(amt < 10) return alert('Minimum withdrawal is 10 USDT!');
+            if(referrals < 5) return alert('You need at least 5 referrals!');
+            if(amt > balance) return alert('Insufficient balance!');
+            
+            balance -= amt;
+            updateUI();
+            alert(`Withdraw request for ${amt} USDT via ${selectedMethod} sent successfully!`);
         });
 
-        // Input change event
-        usdtInput.addEventListener('input', refreshUI);
+        document.getElementById('copyReferBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('referLinkText').innerText);
+            alert('Referral link copied!');
+        });
 
-        // initial refresh
-        refreshUI();
+        document.getElementById('usdtInput').addEventListener('input', updateUI);
 
-        // প্রতি ৫ সেকেন্ডে ডাটা সেভ করার ব্যাকআপ (নিশ্চিত থাকার জন্য)
-        setInterval(saveData, 5000);
+        updateUI();
     })();
 </script>
-
-<!-- floating cartoon elements -->
-<div style="position: fixed; bottom: 10px; left: 10px; opacity:0.3; font-size: 40px; z-index:0;">🪙🪙</div>
-<div style="position: fixed; top: 10px; right: 10px; opacity:0.3; font-size: 60px; z-index:0;">💰</div>
 </body>
 </html>
