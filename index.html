@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>X MONEY IO · Mobile</title>
+    <title>X Money · কার্টুন ওয়ালেট</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Comic Neue', sans-serif;
+            font-family: 'Comic Neue', 'Hind Siliguri', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: linear-gradient(145deg, #f9e57c 0%, #ffb347 100%);
+            background: linear-gradient(145deg, #f9d77e 0%, #ffa726 100%);
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -23,6 +23,79 @@
             overflow: hidden;
         }
 
+        /* লোডিং ওভারলে - কার্টুন মোড */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffd966;
+            background-image: radial-gradient(circle at 20% 30%, #ffeeaa 8%, transparent 18%),
+                              radial-gradient(circle at 90% 70%, #ffbb4a 12%, transparent 22%),
+                              linear-gradient(145deg, #fce38a, #ffb347);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.4s;
+        }
+
+        .loading-box {
+            background: #fef9e4;
+            border: 6px solid #ff8a5c;
+            border-radius: 70px 70px 40px 40px;
+            padding: 30px 30px 45px 30px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 12px 0 #b45f2b, 0 15px 20px rgba(0,0,0,0.2);
+        }
+
+        .loading-emoji {
+            font-size: 3.5rem;
+            filter: drop-shadow(0 6px 0 #c56c2c);
+            margin-bottom: 5px;
+        }
+
+        .loading-box h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #3c1e0b;
+            text-shadow: 3px 3px 0 #ffbe5c;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .loading-bar-container {
+            width: 100%;
+            height: 28px;
+            background: #f1c9a0;
+            border-radius: 40px;
+            border: 3px solid #b45f2b;
+            overflow: hidden;
+            margin: 12px 0;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .loading-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #f6d365 0%, #fda085 100%);
+            border-radius: 40px;
+            box-shadow: 0 0 10px #ffb554;
+            transition: width 0.1s linear;
+        }
+
+        .loading-text-bn {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #442b12;
+            background: #ffedb5;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 40px;
+            border: 2px solid #b45f2b;
+        }
+
+        /* মূল ফোন কন্টেইনার */
         .phone-container {
             width: 100%;
             max-width: 400px;
@@ -36,6 +109,7 @@
             z-index: 10;
             border: 4px solid #ffb554;
             margin: 5px;
+            opacity: 0;
         }
 
         .notch {
@@ -48,7 +122,6 @@
             border-top: none;
         }
 
-        /* Top Bar Updated */
         .unique-bar {
             background: #c1e6f5;
             margin: 0 10px 10px;
@@ -64,12 +137,12 @@
         }
 
         .balance-highlight {
-            background: #ffea00; /* Bright Yellow */
+            background: #ffea00;
             padding: 4px 12px;
             border-radius: 12px;
             border: 2px solid #ff9f1c;
             color: #000;
-            font-size: 1.1rem; /* Bigger size */
+            font-size: 1.1rem;
             font-weight: 900;
             box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
         }
@@ -100,6 +173,7 @@
             padding: 15px;
             border: 2px solid #f3981c;
             margin-bottom: 15px;
+            font-weight: 600;
         }
 
         .btn-earn {
@@ -120,7 +194,6 @@
             box-shadow: 0 2px 0 #2d6e2d;
         }
 
-        /* Withdraw Method Highlights Updated */
         .withdraw-methods {
             display: flex;
             gap: 8px;
@@ -135,17 +208,17 @@
             border-radius: 15px;
             border: 2px solid #ccc;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.2s;
             cursor: pointer;
-            color: #555;
+            color: #000;
         }
 
         .method.active-method {
             background: #ff9f1c;
             border-color: #b64516;
             color: #fff;
-            font-weight: 900; /* Bold when selected */
+            font-weight: 900;
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(182, 69, 22, 0.3);
         }
@@ -153,7 +226,7 @@
         .withdraw-rules {
             background: #ffe0d9;
             border-radius: 15px;
-            padding: 10px;
+            padding: 15px;
             border: 2px solid #ff4d4d;
             margin-top: 10px;
         }
@@ -161,7 +234,20 @@
         .red-highlight {
             color: #c40000;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .highlight-yellow {
+            background: #ffeb99;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #ff9f1c;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 12px 0;
+            color: #b64516;
         }
 
         .tab-bar {
@@ -176,7 +262,7 @@
             flex: 1;
             text-align: center;
             padding: 8px 0;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 800;
             color: #7b3f00;
             background: #fee6a9;
@@ -207,7 +293,8 @@
             background: #f9cf8b;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     
     <script data-project-id="5793" id="gigapub-sdk">
         !function(){
@@ -225,80 +312,132 @@
 </head>
 <body>
 
-<div class="phone-container">
+<!-- কার্টুন লোডিং স্ক্রিন (৭ সেকেন্ড) -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+        <div class="loading-emoji">⚡💰⚡</div>
+        <h1>XMoney</h1>
+        <div style="font-size:1.3rem; font-weight:700; color:#542e0e;">লোডিং...</div>
+        <div class="loading-bar-container">
+            <div class="loading-fill" id="loadingFill"></div>
+        </div>
+        <div class="loading-text-bn" id="loadingText">৭ সেকেন্ড</div>
+    </div>
+</div>
+
+<!-- মূল অ্যাপ কন্টেইনার -->
+<div class="phone-container" id="appContainer">
     <div class="notch"></div>
 
     <div class="unique-bar">
-        <span>🆔 ID: <span id="uniqueIdDisplay">X7K92M</span></span>
+        <span>🆔 আইডি: <span id="uniqueIdDisplay">X7K92M</span></span>
         <div>
-            <small style="display:block; font-size: 0.6rem; text-align: right; margin-bottom: 2px;">BALANCE:</small>
-            <div class="balance-highlight" id="balanceDisplay">0.00 USDT</div>
+            <small style="display:block; font-size: 0.6rem; text-align: right; margin-bottom: 2px;">ব্যালেন্স:</small>
+            <div class="balance-highlight" id="balanceDisplay">০ টাকা</div>
         </div>
     </div>
 
     <div class="panel-container">
+        <!-- হোম প্যানেল -->
         <div id="homePanel" class="panel active-panel">
-            <h2 style="text-align:center; margin-bottom:10px;">💰 X MONEY IO</h2>
+            <h2 style="text-align:center; margin-bottom:10px;">💰 XMoney</h2>
             <div class="home-stats">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">🪙 0.02 USDT Per Ad</div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">👀 Daily Limit: 500 Ads</div>
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: bold;">🎯 Status: Ready to Earn</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">🪙 প্রতি বিজ্ঞাপন: ১৫ টাকা</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">📅 দৈনিক লিমিট: ৩০ টি</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">⏳ প্রতি ঘন্টায়: ১৫ টি</div>
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: bold;">🎯 স্ট্যাটাস: আয় করার জন্য প্রস্তুত</div>
             </div>
-            <button class="btn-earn" id="watchAdBtn">▶ WATCH AD (+0.02)</button>
+            <button class="btn-earn" id="watchAdBtn">▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)</button>
         </div>
 
+        <!-- রেফার প্যানেল -->
         <div id="referPanel" class="panel">
-            <h3>👥 Invite Friends</h3>
-            <div style="background:#d5e6f5; padding:10px; border-radius:15px; margin:10px 0; word-break:break-all; font-size:0.8rem;">
-                <span id="referLinkText">http://t.me/X_MONEYIO_BOT?start=X7K92M</span>
-            </div>
-            <button class="method" id="copyReferBtn" style="width:100%; padding:10px; border-color:#ff9f1c; color:#7b3f00;">📋 Copy Link</button>
-            <div class="home-stats" style="margin-top:15px;">
-                <p>Total Referrals: <strong id="referralCount">1</strong></p>
+            <h3>👥 রেফার বন্ধু</h3>
+            <div class="home-stats" style="text-align:center;">
+                <p style="margin-bottom:15px;">নিচের বাটনে ক্লিক করে বন্ধুদের আমন্ত্রণ জানান</p>
+                <a href="https://t.me/X_MONEYIO_BOT?start=r09829492066" target="_blank" id="referSiteBtn" style="display:inline-block; background:#2e9c77; color:white; padding:14px 25px; border-radius:40px; text-decoration:none; font-weight:bold; font-size:1.2rem; border:3px solid #fdffb3; box-shadow:0 4px 0 #1b5e3f;">🚀 রেফার লিংক</a>
             </div>
         </div>
 
+        <!-- টাস্ক প্যানেল -->
         <div id="taskPanel" class="panel">
-            <h3>📢 Official Task</h3>
+            <h3>📢 অফিসিয়াল টাস্ক</h3>
             <div class="home-stats">
-                <p>Join Telegram Channel</p>
-                <a href="https://t.me/PUFI83" target="_blank" style="display:block; background:#2e9c77; color:white; text-align:center; padding:10px; border-radius:15px; text-decoration:none; margin:10px 0; font-weight:bold;">JOIN @PUFI83</a>
-                <button class="btn-earn" id="verifyTaskBtn" style="font-size:0.9rem; padding:10px;">✅ VERIFY (+0.20)</button>
+                <p>টেলিগ্রাম চ্যানেলে জয়েন করুন</p>
+                <a href="https://t.me/PUFI83" target="_blank" style="display:block; background:#2e9c77; color:white; text-align:center; padding:12px; border-radius:15px; text-decoration:none; margin:10px 0; font-weight:bold;">জয়েন @PUFI83</a>
+                <button class="btn-earn" id="verifyTaskBtn" style="font-size:0.9rem; padding:10px;">✅ ভেরিফাই (+২০ টাকা)</button>
             </div>
         </div>
 
+        <!-- উইথড্র প্যানেল -->
         <div id="withdrawPanel" class="panel">
-            <h3>💸 Withdraw</h3>
+            <h3>💸 টাকা তুলুন</h3>
             <div class="withdraw-methods" id="methodGroup">
-                <div class="method active-method" onclick="selectMethod(this)">Nagad</div>
-                <div class="method" onclick="selectMethod(this)">bKash</div>
-                <div class="method" onclick="selectMethod(this)">TON</div>
+                <div class="method active-method" onclick="selectMethod(this)">বিকাশ</div>
+                <div class="method" onclick="selectMethod(this)">নগদ</div>
             </div>
+            
+            <!-- রেফার কন্ডিশন শুধু মেসেজ হিসেবে -->
+            <div class="highlight-yellow">
+                ⚠️ উত্তোলনের জন্য ৭ টি রেফার প্রয়োজন
+            </div>
+            
             <div class="home-stats">
-                <label>Enter USDT (1 USDT = 125 BDT)</label>
-                <input type="number" id="usdtInput" value="10">
-                <p style="margin-top:10px;">Receive: <strong id="bdtPreview" style="color: #2e9c77; font-size: 1.2rem;">1250</strong> BDT</p>
+                <label>টাকার পরিমাণ লিখুন (মিনিমাম ১৫০০ টাকা)</label>
+                <input type="number" id="withdrawAmountInput" value="1500" min="1500" step="50">
+                <p style="margin-top:10px;"> আপনি পাবেন: <strong id="bdtPreview" style="color: #2e9c77; font-size: 1.2rem;">১৫০০</strong> টাকা </p>
             </div>
             <div class="withdraw-rules">
-                <p class="red-highlight">🔴 Min Withdraw: 10 USDT</p>
-                <p class="red-highlight">🔴 Need 5 Referrals (Current: <span id="refNeed">1</span>)</p>
+                <p class="red-highlight">🔴 নূন্যতম উত্তোলন: ১৫০০ টাকা</p>
+                <p class="red-highlight">👥 প্রয়োজনীয় রেফার: ৭ টি (বাধ্যতামূলক)</p>
+                <p class="red-highlight">⚠️ ১৫০০ টাকা হলেই হবে না, ৭ রেফার না থাকলে টাকা তোলা যাবে না</p>
             </div>
-            <button id="withdrawBtn" class="btn-earn" style="margin-top:10px; background:#fd8b78;">REQUEST WITHDRAW</button>
+            <button id="withdrawBtn" class="btn-earn" style="margin-top:10px; background:#fd8b78;">টাকা উত্তোলন করুন</button>
         </div>
     </div>
 
     <div class="tab-bar">
-        <div class="tab-btn active" data-tab="home">HOME</div>
-        <div class="tab-btn" data-tab="refer">REFER</div>
-        <div class="tab-btn" data-tab="task">TASK</div>
-        <div class="tab-btn" data-tab="withdraw">CASH</div>
+        <div class="tab-btn active" data-tab="home">হোম</div>
+        <div class="tab-btn" data-tab="refer">রেফার</div>
+        <div class="tab-btn" data-tab="task">টাস্ক</div>
+        <div class="tab-btn" data-tab="withdraw">ক্যাশ আউট</div>
     </div>
     
-    <div class="footer-currency">⚡ Cartoon earn · every click counts ⚡</div>
+    <div class="footer-currency">⚡ কার্টুন আয় · প্রতিটি ক্লিক মূল্যবান ⚡</div>
 </div>
 
 <script>
-    // Withdraw Selection Function
+    // লোডিং স্ক্রিন
+    (function loadingScreen() {
+        const overlay = document.getElementById('loadingOverlay');
+        const app = document.getElementById('appContainer');
+        const fill = document.getElementById('loadingFill');
+        const loadingText = document.getElementById('loadingText');
+        let width = 0;
+        const totalTime = 7000;
+        const intervalTime = 70;
+        const step = (intervalTime / totalTime) * 100;
+
+        const interval = setInterval(() => {
+            width += step;
+            if (width >= 100) {
+                width = 100;
+                fill.style.width = width + '%';
+                loadingText.innerText = 'শুরু হচ্ছে ✨';
+                clearInterval(interval);
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    app.style.opacity = '1';
+                }, 400);
+            } else {
+                fill.style.width = width + '%';
+                let secLeft = Math.ceil((totalTime - (width/100)*totalTime)/1000);
+                loadingText.innerText = `${secLeft} সেকেন্ড`;
+            }
+        }, intervalTime);
+    })();
+
     function selectMethod(el) {
         const methods = document.querySelectorAll('.method');
         methods.forEach(m => m.classList.remove('active-method'));
@@ -306,73 +445,110 @@
     }
 
     (function() {
-        let balance = parseFloat(localStorage.getItem('x_bal')) || 0;
-        let referrals = parseInt(localStorage.getItem('x_ref')) || 1;
-        let taskDone = localStorage.getItem('x_task') === 'true';
+        let balance = parseFloat(localStorage.getItem('x_bal_bdt')) || 0;
+        let referrals = parseInt(localStorage.getItem('x_ref_count')) || 0;
+        let taskDone = localStorage.getItem('x_task_bdt') === 'true';
         const userId = 'X7K92M';
+        
+        let hourlyWatchCount = parseInt(localStorage.getItem('x_hourly_count')) || 0;
+        let lastHourReset = parseInt(localStorage.getItem('x_hourly_reset')) || 0;
+        let dailyWatchCount = parseInt(localStorage.getItem('x_daily_count')) || 0;
+        let lastDayReset = parseInt(localStorage.getItem('x_daily_reset')) || 0;
+
+        function checkAndResetCounters() {
+            const now = Date.now();
+            if (now - lastHourReset > 60 * 60 * 1000) {
+                hourlyWatchCount = 0;
+                lastHourReset = now;
+                localStorage.setItem('x_hourly_reset', lastHourReset);
+            }
+            if (now - lastDayReset > 24 * 60 * 60 * 1000) {
+                dailyWatchCount = 0;
+                lastDayReset = now;
+                localStorage.setItem('x_daily_reset', lastDayReset);
+            }
+        }
+        checkAndResetCounters();
 
         function updateUI() {
-            document.getElementById('balanceDisplay').innerText = balance.toFixed(2) + ' USDT';
-            document.getElementById('referralCount').innerText = referrals;
-            document.getElementById('refNeed').innerText = referrals;
+            document.getElementById('balanceDisplay').innerText = balance.toFixed(0) + ' টাকা';
             document.getElementById('uniqueIdDisplay').innerText = userId;
-            
-            const bdt = (parseFloat(document.getElementById('usdtInput').value) || 0) * 125;
-            document.getElementById('bdtPreview').innerText = bdt.toFixed(0);
+
+            const amtInput = document.getElementById('withdrawAmountInput');
+            let withdrawAmt = parseFloat(amtInput.value) || 1500;
+            if (withdrawAmt < 1500) withdrawAmt = 1500;
+            document.getElementById('bdtPreview').innerText = withdrawAmt.toFixed(0);
 
             if(taskDone) {
                 const vt = document.getElementById('verifyTaskBtn');
                 vt.disabled = true;
-                vt.innerText = 'CLAIMED';
+                vt.innerText = 'সম্পন্ন ✓';
                 vt.style.background = '#ccc';
                 vt.style.boxShadow = 'none';
             }
 
-            localStorage.setItem('x_bal', balance);
-            localStorage.setItem('x_ref', referrals);
-            localStorage.setItem('x_task', taskDone);
+            localStorage.setItem('x_bal_bdt', balance);
+            localStorage.setItem('x_ref_count', referrals);
+            localStorage.setItem('x_hourly_count', hourlyWatchCount);
+            localStorage.setItem('x_daily_count', dailyWatchCount);
+            localStorage.setItem('x_task_bdt', taskDone);
         }
 
-        // Ad Logic
+        // এড দেখা
         const watchBtn = document.getElementById('watchAdBtn');
         watchBtn.addEventListener('click', () => {
+            checkAndResetCounters();
+
+            if (dailyWatchCount >= 30) {
+                alert('দৈনিক লিমিট ৩০টি শেষ! আগামীকাল আবার চেষ্টা করুন।');
+                return;
+            }
+            if (hourlyWatchCount >= 15) {
+                alert('প্রতি ঘন্টায় মাত্র ১৫টি এড দেখা যায়। এক ঘন্টা পরে আবার চেষ্টা করুন।');
+                return;
+            }
+
             watchBtn.disabled = true;
-            watchBtn.innerText = '⏳ LOADING...';
+            watchBtn.innerText = '⏳ লোডিং ...';
 
             const safetyTimeout = setTimeout(() => {
-                if(watchBtn.disabled && watchBtn.innerText === '⏳ LOADING...') {
+                if(watchBtn.disabled && watchBtn.innerText === '⏳ লোডিং ...') {
                     watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ WATCH AD (+0.02)';
-                    alert('Connection slow. Please try again.');
+                    watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
+                    alert('কানেকশন ধীর। আবার চেষ্টা করুন।');
                 }
             }, 10000);
 
             if (typeof window.showGiga === 'function') {
                 window.showGiga().then(() => {
                     clearTimeout(safetyTimeout);
-                    balance += 0.02;
+                    balance += 15;
+                    hourlyWatchCount++;
+                    dailyWatchCount++;
                     updateUI();
-                    alert('🎬 Success! 0.02 USDT added.');
+                    alert('🎉 অভিনন্দন! ১৫ টাকা যোগ হয়েছে।');
                 }).catch(() => {
                     clearTimeout(safetyTimeout);
-                    alert('Ad failed. Try again.');
+                    alert('এড ব্যর্থ। আবার চেষ্টা করুন।');
                 }).finally(() => {
                     watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ WATCH AD (+0.02)';
+                    watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
                 });
             } else {
                 setTimeout(() => {
                     clearTimeout(safetyTimeout);
-                    balance += 0.02;
+                    balance += 15;
+                    hourlyWatchCount++;
+                    dailyWatchCount++;
                     updateUI();
                     watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ WATCH AD (+0.02)';
-                    alert('🎬 Ad Finished!');
+                    watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
+                    alert('🎬 এড শেষ! ১৫ টাকা পেয়েছেন!');
                 }, 2000);
             }
         });
 
-        // Tabs
+        // ট্যাব সুইচ
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -382,37 +558,50 @@
             });
         });
 
-        // Task
+        // টাস্ক ভেরিফাই
         document.getElementById('verifyTaskBtn').addEventListener('click', () => {
             if(!taskDone) {
-                balance += 0.20;
+                balance += 20;
                 taskDone = true;
                 updateUI();
-                alert('Task Complete! +0.20 USDT');
+                alert('টাস্ক কমপ্লিট! +২০ টাকা');
+            } else {
+                alert('আপনি ইতিমধ্যে টাস্ক সম্পন্ন করেছেন।');
             }
         });
 
-        // Withdraw
+        // রেফার বাটনে ক্লিক
+        document.getElementById('referSiteBtn').addEventListener('click', function(e) {
+            referrals += 1;
+            updateUI();
+            alert('রেফারেল সফল! +১ রেফার যুক্ত হয়েছে');
+            window.open('https://t.me/X_MONEYIO_BOT?start=r09829492066', '_blank');
+        });
+
+        // উইথড্র চেক
         document.getElementById('withdrawBtn').addEventListener('click', () => {
-            const amt = parseFloat(document.getElementById('usdtInput').value);
+            const amt = parseFloat(document.getElementById('withdrawAmountInput').value);
             const selectedMethod = document.querySelector('.method.active-method').innerText;
-            
-            if(amt < 10) return alert('Minimum withdrawal is 10 USDT!');
-            if(referrals < 5) return alert('You need at least 5 referrals!');
-            if(amt > balance) return alert('Insufficient balance!');
-            
+
+            if (amt < 1500) {
+                alert('ন্যূনতম ১৫০০ টাকা তুলতে হবে!');
+                return;
+            }
+            if (referrals < 7) {
+                alert(`আপনার ৭ টি রেফার পূর্ণ হয়নি। আগে ৭ টি রেফার পূর্ণ করুন, তারপর উত্তোলন করুন।`);
+                return;
+            }
+            if (amt > balance) {
+                alert('পর্যাপ্ত ব্যালেন্স নেই!');
+                return;
+            }
+
             balance -= amt;
             updateUI();
-            alert(`Withdraw request for ${amt} USDT via ${selectedMethod} sent successfully!`);
+            alert(`✅ ${amt} টাকা উত্তোলনের অনুরোধ গৃহীত হয়েছে। ${selectedMethod} এ পাঠানো হবে`);
         });
 
-        document.getElementById('copyReferBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(document.getElementById('referLinkText').innerText);
-            alert('Referral link copied!');
-        });
-
-        document.getElementById('usdtInput').addEventListener('input', updateUI);
-
+        document.getElementById('withdrawAmountInput').addEventListener('input', updateUI);
         updateUI();
     })();
 </script>
