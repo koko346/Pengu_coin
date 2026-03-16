@@ -345,7 +345,7 @@
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">🪙 প্রতি বিজ্ঞাপন: ১৫ টাকা</div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">📅 দৈনিক লিমিট: ৩০ টি</div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">⏳ প্রতি ঘন্টায়: ১৫ টি</div>
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: bold;">🎯 স্ট্যাটাস: আয় করার জন্য প্রস্তুত</div>
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: bold;" id="dailyTaskStatus">🎯 আজ বাকি: ৩০ টি</div>
             </div>
             <button class="btn-earn" id="watchAdBtn">▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)</button>
         </div>
@@ -455,6 +455,10 @@
         let dailyWatchCount = parseInt(localStorage.getItem('x_daily_count')) || 0;
         let lastDayReset = parseInt(localStorage.getItem('x_daily_reset')) || 0;
 
+        // নতুন: দৈনিক বাকি টাস্ক
+        let dailyTaskLeft = 30 - dailyWatchCount;
+        if (dailyTaskLeft < 0) dailyTaskLeft = 0;
+
         function checkAndResetCounters() {
             const now = Date.now();
             if (now - lastHourReset > 60 * 60 * 1000) {
@@ -464,8 +468,12 @@
             }
             if (now - lastDayReset > 24 * 60 * 60 * 1000) {
                 dailyWatchCount = 0;
+                dailyTaskLeft = 30;
                 lastDayReset = now;
                 localStorage.setItem('x_daily_reset', lastDayReset);
+                localStorage.setItem('x_daily_count', dailyWatchCount);
+            } else {
+                dailyTaskLeft = 30 - dailyWatchCount;
             }
         }
         checkAndResetCounters();
@@ -486,6 +494,9 @@
                 vt.style.background = '#ccc';
                 vt.style.boxShadow = 'none';
             }
+
+            // দৈনিক বাকি টাস্ক আপডেট
+            document.getElementById('dailyTaskStatus').innerText = `🎯 আজ বাকি: ${dailyTaskLeft} টি`;
 
             localStorage.setItem('x_bal_bdt', balance);
             localStorage.setItem('x_ref_count', referrals);
@@ -525,6 +536,7 @@
                     balance += 15;
                     hourlyWatchCount++;
                     dailyWatchCount++;
+                    dailyTaskLeft = 30 - dailyWatchCount;
                     updateUI();
                     alert('🎉 অভিনন্দন! ১৫ টাকা যোগ হয়েছে।');
                 }).catch(() => {
@@ -540,6 +552,7 @@
                     balance += 15;
                     hourlyWatchCount++;
                     dailyWatchCount++;
+                    dailyTaskLeft = 30 - dailyWatchCount;
                     updateUI();
                     watchBtn.disabled = false;
                     watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
