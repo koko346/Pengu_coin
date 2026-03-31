@@ -155,10 +155,15 @@
             text-align: center;
             filter: drop-shadow(10px 15px 0 rgba(93, 64, 55, 0.3));
             animation: gentleFloat 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .big-cow:hover {
+            transform: scale(1.02);
         }
         @keyframes gentleFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
+            50% { transform: translateY(-12px); }
         }
         .grass-field {
             background: linear-gradient(180deg, #6B8E23 0%, #5A7D2A 100%);
@@ -166,18 +171,43 @@
             padding: 2rem;
             position: relative;
             overflow: hidden;
+            min-height: 400px;
         }
         .grass-blade {
             position: absolute;
             bottom: 0;
             width: 3px;
-            height: 30px;
             background: #4CAF50;
             animation: sway 2s ease-in-out infinite;
         }
         @keyframes sway {
             0%, 100% { transform: rotate(0deg); }
             50% { transform: rotate(5deg); }
+        }
+        .farm-cow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        .farm-big-cow {
+            font-size: 200px;
+            filter: drop-shadow(8px 12px 0 rgba(93, 64, 55, 0.25));
+            animation: gentleFloat 2.5s ease-in-out infinite;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-10px); }
         }
     </style>
 </head>
@@ -245,10 +275,8 @@
             }
         };
 
-        // Load Gigapub SDK and show ad properly
+        // Load Gigapub SDK
         let adScriptLoaded = false;
-        let adQueue = [];
-        let isShowingAd = false;
         
         const initGigapub = () => {
             return new Promise((resolve) => {
@@ -262,7 +290,6 @@
                 script.async = true;
                 script.onload = () => {
                     adScriptLoaded = true;
-                    // Wait for SDK to initialize
                     setTimeout(() => {
                         resolve();
                     }, 800);
@@ -278,7 +305,6 @@
             return new Promise(async (resolve) => {
                 await initGigapub();
                 
-                // Try to show ad
                 if (typeof window.showGiga === 'function') {
                     try {
                         await window.showGiga();
@@ -294,7 +320,6 @@
                         resolve(true);
                     }
                 } else {
-                    // Simulate ad completion
                     resolve(true);
                 }
             });
@@ -311,19 +336,17 @@
             } catch(e) { console.error('Telegram error:', e); }
         };
 
-        // Send deposit request
         const sendDepositRequest = async (username, tonAddress, userId) => {
             const message = `💰 NEW DEPOSIT REQUEST!\n\n👤 Telegram Username: @${username}\n💳 TON Address: ${tonAddress}\n🆔 User ID: ${userId}\n💎 Amount: 1 TON\n\n📌 Send deposit code to user.`;
             await sendTelegramMessage(message);
         };
 
-        // Send withdrawal notification
         const sendWithdrawalNotification = async (address, amount, time) => {
             const message = `💸 WITHDRAWAL REQUEST!\n\n💳 TON Address: ${address}\n💎 Amount: ${amount.toFixed(4)} TON\n⏰ Time: ${time}\n\n✅ Withdrawal processed successfully.`;
             await sendTelegramMessage(message);
         };
 
-        const STORAGE_KEY = 'rice_farm_tycoon_v17';
+        const STORAGE_KEY = 'rice_farm_tycoon_v18';
         const loadGameData = () => {
             try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : null; } catch(e) { return null; }
         };
@@ -353,12 +376,10 @@
             
             const totalMilkPerCollection = 20 + cows.reduce((total, cow) => total + COW_BREEDS[cow.breed].rate, 0);
             
-            // Initialize Gigapub on app start
             useEffect(() => {
                 initGigapub();
             }, []);
             
-            // Auto ads every 35 seconds on farm page
             useEffect(() => {
                 if (page === 'farm') {
                     if (autoAdInterval.current) clearInterval(autoAdInterval.current);
@@ -420,7 +441,7 @@
                 return () => clearInterval(growInterval);
             }, []);
             
-            // Canvas drawing
+            // Canvas drawing with farm and big cow when no cows
             useEffect(() => {
                 const canvas = canvasRef.current;
                 if (!canvas || page !== 'farm') return;
@@ -431,6 +452,7 @@
                 
                 const draw = () => {
                     ctx.clearRect(0, 0, w, h);
+                    // Sky
                     ctx.fillStyle = '#FFE4B5';
                     ctx.fillRect(0, 0, w, h * 0.6);
                     ctx.fillStyle = '#FFE484';
@@ -444,11 +466,27 @@
                     ctx.ellipse(60, 60, 30, 25, 0, 0, Math.PI * 2);
                     ctx.fill();
                     
+                    // Grass ground
                     ctx.fillStyle = '#6B8E23';
                     ctx.fillRect(0, h * 0.6, w, h * 0.4);
                     ctx.fillStyle = '#5A7D2A';
                     for(let i = 0; i < 30; i++) ctx.fillRect((i * 35) % w, h * 0.6 + 5, 18, 4);
                     
+                    // Grass blades
+                    ctx.strokeStyle = '#4CAF50';
+                    ctx.lineWidth = 2;
+                    for(let i = 0; i < 60; i++) {
+                        const x = (i * 15) % w;
+                        const bladeHeight = 10 + (i % 15);
+                        ctx.beginPath();
+                        ctx.moveTo(x, h * 0.6);
+                        ctx.lineTo(x - 2, h * 0.6 - bladeHeight);
+                        ctx.lineTo(x + 2, h * 0.6 - bladeHeight - 3);
+                        ctx.fillStyle = '#5A9E2E';
+                        ctx.fill();
+                    }
+                    
+                    // Plants
                     plants.forEach(p => {
                         ctx.fillStyle = '#8B5A2B';
                         ctx.beginPath();
@@ -472,6 +510,7 @@
                         }
                     });
                     
+                    // Cows (purchased cows)
                     const cowPositions = [
                         { x: 120, y: 310 }, { x: 280, y: 315 }, { x: 440, y: 305 }, 
                         { x: 600, y: 320 }, { x: 760, y: 310 }
@@ -523,10 +562,19 @@
                         ctx.restore();
                     });
                     
+                    // Draw big cow on grass when no cows
                     if (cows.length === 0) {
+                        // Big cow emoji on grass
+                        ctx.font = '160px sans-serif';
                         ctx.fillStyle = '#5D4037';
-                        ctx.font = 'bold 20px Fredoka';
-                        ctx.fillText('🐄 Buy cows from the shop! 🛒', w/2 - 130, h - 50);
+                        ctx.shadowBlur = 0;
+                        ctx.fillText('🐄', w/2 - 80, h - 70);
+                        ctx.font = 'bold 22px Fredoka';
+                        ctx.fillStyle = '#5D4037';
+                        ctx.fillText('Buy cows from the shop! 🛒', w/2 - 140, h - 20);
+                        ctx.font = '14px Fredoka';
+                        ctx.fillStyle = '#8B5A2B';
+                        ctx.fillText('Click SHOP to buy cows and increase milk production!', w/2 - 180, h - 5);
                     }
                 };
                 draw();
@@ -684,7 +732,6 @@
                 const timeStr = now.toLocaleString();
                 showToast(`💸 Withdrawn ${amount.toFixed(4)} TON`);
                 sm.play('click');
-                // Send withdrawal notification to Telegram
                 sendWithdrawalNotification(addr, amount, timeStr);
             };
             
@@ -787,8 +834,7 @@
                         )}
                         
                         {page === 'tasks' && (
-                            <div className="grass-field relative">
-                                {/* Big Cow */}
+                            <div className="grass-field">
                                 <div className="big-cow mb-4">🐄</div>
                                 <div className="cartoon-card bg-white/90 relative z-10">
                                     <h2 className="font-black text-2xl">📋 Earn Free TON</h2>
@@ -803,9 +849,8 @@
                                     </div>
                                     <p className="text-xs text-center text-gray-500 mt-4">⚠️ One-time reward only! You can only claim this once.</p>
                                 </div>
-                                {/* Grass blades animation */}
                                 {[...Array(12)].map((_, i) => (
-                                    <div key={i} className="grass-blade" style={{ left: `${(i * 8) + 2}%`, bottom: '0', height: `${20 + Math.random() * 20}px`, animationDelay: `${i * 0.2}s` }}></div>
+                                    <div key={i} className="grass-blade" style={{ left: `${(i * 8) + 2}%`, bottom: '0', height: `${20 + (i % 15)}px`, animationDelay: `${i * 0.15}s`, width: '3px' }}></div>
                                 ))}
                             </div>
                         )}
